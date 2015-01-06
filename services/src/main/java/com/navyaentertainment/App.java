@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.omg.SendingContext.RunTimeOperations;
+import com.navyaentertainment.services.RTPSplitterChannelDomain;
 
 /**
  * Hello world!
@@ -14,9 +14,20 @@ public class App
 {
 	
 	private static Interfaces interfaces = new Interfaces();
-	private static RTPBuffer buffer = new RTPBuffer(250, 1000, false);
-	private static RTPBuffer muxBuffer = new RTPBuffer(5000, 250, true);
-    public static void main( String[] args ) throws Exception
+	private static RTPBuffer buffer;
+	private static RTPBuffer muxBuffer;
+	private RTPSplitterChannelDomain rtpSplitterChannelDomain = null;
+	Thread[] runningThreads;
+	
+	public App(){
+		
+	}
+	public App(RTPSplitterChannelDomain rtpSplitterChannelDomain){
+		this.rtpSplitterChannelDomain = rtpSplitterChannelDomain;
+		buffer = new RTPBuffer(Integer.parseInt(rtpSplitterChannelDomain.getDefaultBuffer_bufferTime()), Integer.parseInt(rtpSplitterChannelDomain.getDefaultBuffer_fetchGracePeriod()), Boolean.parseBoolean(rtpSplitterChannelDomain.getDefaultBuffer_processMissingPackets()));
+		muxBuffer = new RTPBuffer(Integer.parseInt(rtpSplitterChannelDomain.getMaxBuffer_bufferTime()), Integer.parseInt(rtpSplitterChannelDomain.getMaxBuffer_fetchGracePeriod()), Boolean.parseBoolean(rtpSplitterChannelDomain.getMaxBuffer_processMissingPackets()));
+	}
+    public void start() throws Exception
     {
     	Thread[] threads = {
     			
@@ -24,10 +35,10 @@ public class App
     		    new Thread(() -> {
     		    	System.out.println("UDP Writing thread from Muxer");
 //    		    	readRTPStreamToBuffer();
-    		    	int port = 10000;
+    		    	int port = Integer.parseInt(rtpSplitterChannelDomain.getInputTCPChannelPort());
     		    	InetAddress address = null;
 					try {
-						address = InetAddress.getByName("127.0.0.1");
+						address = InetAddress.getByName(rtpSplitterChannelDomain.getInputTCPChannel());
 						RTPOutputStream stream = new RTPOutputStream(address, address, port);
 						stream.send(muxBuffer);
 					} catch (Exception e) {
@@ -56,10 +67,10 @@ public class App
     		    new Thread(() -> {
     		    	System.out.println("TCP Reading thread for muxing");
 //    		    	readRTPStreamToBuffer();
-    		    	int port = 6000;
+    		    	int port = Integer.parseInt(rtpSplitterChannelDomain.getOutputTCPChannelPort());
     		    	InetAddress address = null;
 					try {
-						address = InetAddress.getByName("0.0.0.0");
+						address = InetAddress.getByName(rtpSplitterChannelDomain.getOutputTCPChannel());
 						RTPTCPInputStream stream = new RTPTCPInputStream(muxBuffer);
 						stream.bind();
 						while (true) { Thread.sleep(100);}
@@ -73,10 +84,10 @@ public class App
     		    new Thread(() -> {
     		    	System.out.println("Reading thread from Input");
 //    		    	readRTPStreamToBuffer();
-    		    	int port = 9000;
+    		    	int port = Integer.parseInt(rtpSplitterChannelDomain.getOutputUDPChannelPort());
     		    	InetAddress address = null;
 					try {
-						address = InetAddress.getByName("0.0.0.0");
+						address = InetAddress.getByName(rtpSplitterChannelDomain.getOutputUDPChannel());
 						RTPInputStream stream = new RTPInputStream(address, port);
 						stream.recieve(buffer);
 					} catch (Exception e) {
@@ -114,11 +125,12 @@ public class App
     		    })
     		};
     		 
+    		runningThreads = threads;
     		// Start all threads
-    		Arrays.stream(threads).forEach(Thread::start);
+    		Arrays.stream(runningThreads).forEach(Thread::start);
     		 
     		// Join all threads
-    		Arrays.stream(threads).forEach(t -> {
+    		Arrays.stream(runningThreads).forEach(t -> {
     			
     		    try { 
     		    	System.out.println("Wating for thread to Join " + t.getName());
@@ -126,6 +138,7 @@ public class App
     		    }
     		    catch (InterruptedException ignore) {}
     		});
+    		
     	
     }
     
@@ -155,6 +168,11 @@ public class App
 			e.printStackTrace();
 		}
 	}
+    public void stop(){
+    	Arrays.stream(runningThreads).forEach(t -> {
+    		t.interrupt();
+    	});
+    }
     
     public static void sendRTPStream() {
     	

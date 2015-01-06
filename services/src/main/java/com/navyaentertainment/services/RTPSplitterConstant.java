@@ -1,4 +1,4 @@
-package com.livedevices.web.services;
+package com.navyaentertainment.services;
 
 public class RTPSplitterConstant {
 	public static final String INPUT_TCP_CHANNEL_KEY="inputTCPChannel";

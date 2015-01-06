@@ -1,8 +1,7 @@
-package com.livedevices.web.services;
+package com.navyaentertainment.services;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,20 +9,17 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import javax.sound.sampled.Port;
-
 public class RTPSplitterServicesImpl implements RTPSplitterServices {
-
 	
+	private File propertyFile;
 	
 	public boolean updateChannels(RTPSplitterChannelDomain rtpSplitterChannelDomain) {
 		Properties prop = new Properties();
 		OutputStream output = null;
 
 		try {
-			File file = getFile();
-			prop = getProperties(file);
-			output = new FileOutputStream(file);
+			prop = getProperties();
+			output = new FileOutputStream(propertyFile);
 			prop.setProperty(RTPSplitterConstant.INPUT_TCP_CHANNEL_KEY, rtpSplitterChannelDomain.getInputTCPChannel());
 			prop.setProperty(RTPSplitterConstant.OUTPUT_TCP_CHANNEL_KEY, rtpSplitterChannelDomain.getOutputTCPChannel());
 			prop.setProperty(RTPSplitterConstant.INPUT_UDP_CHANNEL_KEY, rtpSplitterChannelDomain.getInputUDPChannel());
@@ -60,8 +56,7 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 		InputStream input = null;
 		RTPSplitterChannelDomain channel = new RTPSplitterChannelDomain();
 		try {
-			File file = getFile();
-			prop = getProperties(file);
+			prop = getProperties();
 			channel.setInputTCPChannel(prop.getProperty(RTPSplitterConstant.INPUT_TCP_CHANNEL_KEY));
 			channel.setOutputTCPChannel(prop.getProperty(RTPSplitterConstant.OUTPUT_TCP_CHANNEL_KEY));
 			channel.setInputUDPChannel(prop.getProperty(RTPSplitterConstant.INPUT_UDP_CHANNEL_KEY));
@@ -91,14 +86,10 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 		}
 		return channel;
 	}
-	private File getFile(){
-		URL url = getClass().getResource(RTPSplitterConstant.FILE_NAME);
-		File file = new File(url.getPath());
-		return file;
-	}
-	private Properties getProperties(File file) throws IOException{
+	
+	private Properties getProperties() throws IOException{
 		Properties properties = new Properties();
-		InputStream input = new FileInputStream(file);
+		InputStream input = new FileInputStream(propertyFile);
 		properties.load(input);
 		return properties;
 	}
@@ -108,9 +99,8 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 		OutputStream output = null;
 
 		try {
-			File file = getFile();
-			prop = getProperties(file);
-			output = new FileOutputStream(file);
+			prop = getProperties();
+			output = new FileOutputStream(propertyFile);
 			prop.setProperty(RTPSplitterConstant.FETCHSEQUENCE, bufferDomain.getFetchSequence()+"");
 			prop.setProperty(RTPSplitterConstant.INSERTSEQUENCE, bufferDomain.getInsertSequence()+"");
 			prop.setProperty(RTPSplitterConstant.RESETCOUNT, bufferDomain.getResetCount()+"");
@@ -145,8 +135,7 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 		InputStream input = null;
 		BufferDomain bufferDomain = new BufferDomain();
 		try {
-			File file = getFile();
-			prop = getProperties(file);			
+			prop = getProperties();			
 			bufferDomain.setFetchSequence(Integer.parseInt(prop.getProperty(RTPSplitterConstant.FETCHSEQUENCE,"-1")));
 			bufferDomain.setInsertSequence(Integer.parseInt(prop.getProperty(RTPSplitterConstant.INSERTSEQUENCE,"-1")));
 			bufferDomain.setResetCount(Integer.parseInt(prop.getProperty(RTPSplitterConstant.RESETCOUNT,"0")));
@@ -172,5 +161,10 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 			}
 		}
 		return bufferDomain;
+	}
+
+	@Override
+	public void setPropertyFile(File file) {
+		this.propertyFile = file;
 	}
 }

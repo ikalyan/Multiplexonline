@@ -92,6 +92,19 @@
 	    });
 	   deviceApp.controller('SimpleController',function($scope, apiService){
 	   	$scope.$root.content = "Dashboard";
+	   	$scope.serverStatus = "Start"
+	   	$scope.startServer = function(){
+	   		apiService.request({
+				 apiMethod: "services/rtpSplitter/startServer",
+				 httpMethod:"GET",
+				 params:{state:$scope.serverStatus}
+			}).success(function(response) {
+					alert("server running....")
+					$scope.serverStatus="Stop";
+			});
+	   		$scope.serverStatus="Stop";
+	   	}
+	   	
 	   });
 	   deviceApp.controller('channelController',function($scope, apiService){
 			apiService.request({
@@ -170,7 +183,9 @@
 	            <!-- /.navbar-header -->
 
 	            <ul class="nav navbar-top-links navbar-right">
-	                
+	                <li class="dropdown">
+	                	<input class="from-group form-control" type="button" ng-model="serverStatus" ng-value="serverStatus" ng-click="startServer()"/>
+	                </li>
 	                <!-- /.dropdown -->
 	                <li class="dropdown">
 	                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">

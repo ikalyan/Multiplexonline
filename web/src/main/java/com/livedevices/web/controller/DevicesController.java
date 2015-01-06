@@ -1,6 +1,10 @@
 package com.livedevices.web.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,17 +12,29 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.livedevices.web.services.BufferDomain;
-import com.livedevices.web.services.RTPSplitterChannelDomain;
-import com.livedevices.web.services.RTPSplitterServices;
+import com.navyaentertainment.App;
+import com.navyaentertainment.services.BufferDomain;
+import com.navyaentertainment.services.RTPSplitterChannelDomain;
+import com.navyaentertainment.services.RTPSplitterConstant;
+import com.navyaentertainment.services.RTPSplitterServices;
 
 @Controller
 @RequestMapping("/rtpSplitter")
 public class DevicesController {
 
 	protected static Logger logger = Logger.getLogger(DevicesController.class);
+	 
+	private File propertyFile;
+	
+	@PostConstruct
+	public void init() {
+		URL url = getClass().getResource(RTPSplitterConstant.FILE_NAME);
+		this.propertyFile = new File(url.getPath());
+		rtpSplitterServices.setPropertyFile(propertyFile);
+	}
 	
 	@Autowired
 	private RTPSplitterServices rtpSplitterServices;
@@ -54,6 +70,21 @@ public class DevicesController {
 	@ResponseBody
 	public boolean updateBufferSettings(@RequestBody BufferDomain bufferDomain) throws IOException {
 		return rtpSplitterServices.updateBufferSettings(bufferDomain);
+	}
+	
+	@RequestMapping(value = "/startServer", method = RequestMethod.GET)
+	@ResponseBody
+	public boolean startServer(@RequestParam("state") String state) throws Exception {
+		
+		if(state =="Stop"){
+			App app =new App();
+			app.stop();
+		}else{
+			RTPSplitterChannelDomain channelDomain = rtpSplitterServices.getRTPSChannel();
+			App app =new App(channelDomain);
+			app.start();
+		}
+		return true;
 	}
 	
 }

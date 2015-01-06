@@ -1,4 +1,4 @@
-package com.livedevices.web.services;
+package com.navyaentertainment.services;
 
 public class RTPSplitterChannelDomain {
 	
