@@ -1,0 +1,218 @@
+<html data-ng-app="deviceApp">
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="">
+   <meta name="author" content="">
+
+   <title>Device Admin</title>
+
+   <head>
+	   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	   <link href="stylesheet/sb-admin-2.css" rel="stylesheet">
+	   <link href="stylesheet/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	   
+
+	   <script src="javascript/jquery.js"></script>
+	   <script src="javascript/bootstrap.min.js"></script>
+	   <script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	   <script src="javascript/angular-route.js"></script>
+	   <script src="javascript/apiService.js"></script>
+	   <script src="javascript/jstree/jquery.jstree.js"></script>
+	   
+	   <script language="javascript">
+	   var deviceApp = angular.module('deviceApp',['ngRoute','ApiModule']);
+	   
+	    deviceApp.config(function($routeProvider){
+		$routeProvider.when("/",{
+			controller:'SimpleController',
+			template:'<h1 class="page-header" id="channels_list_id">{{$root.content}}</h1>'
+			})
+			.when('/channels',{
+				controller:'channelController',
+				templateUrl:'channels.html'
+			})
+			.when('/bufferSettings',{
+				controller:'bufferController',
+				templateUrl:'bufferSettings.html'
+				});
+		});
+   
+	   deviceApp.directive('deviceTree', function(apiService) {
+	       return {
+	            restrict: 'E',
+	            link: function(scope, element) {
+	            	var treeElement = $(element);
+	            	apiService.request({
+						httpMethod:"GET",
+						apiMethod: "services/rtpSplitter/list"
+					}).success(function(response) {
+	    				treeElement.jstree({ 
+						"json_data" : {
+							"data" : response
+						},
+						"themes" : {
+							"theme" : "default",
+							"dots" : false,
+							"icons" : false
+                        },
+                        "contextmenu":{         
+						    "items": function($node) {
+						        return {
+						            "EnableDevice": {
+						                "separator_before": false,
+						                "separator_after": false,
+						                "label": "Enable Device",
+						                "action": function (obj) {
+						                    alert(obj[0].textContent + " device enabled");
+						                }
+						            },
+						            "DisableDevice": {
+						                "separator_before": false,
+						                "separator_after": false,
+						                "label": "Disable Device",
+						                "action": function (obj) {
+						                   alert(obj[0].textContent + " device disabled");
+						                }
+						            }
+						        };
+						    }
+						},
+						"plugins" : [ "themes", "json_data","contextmenu"]
+						});
+	    			});
+					treeElement.on("click",function (e) { 
+						var li = $(e.target).closest("li");
+						var childScope = angular.element($("#channels_list_id")).scope();
+						scope.$root.content = li[0].textContent; 
+						scope.$root.$apply();
+					});
+	            }
+	        }
+	    });
+	   deviceApp.controller('SimpleController',function($scope, apiService){
+	   	$scope.$root.content = "Dashboard";
+	   });
+	   deviceApp.controller('channelController',function($scope, apiService){
+			apiService.request({
+				 apiMethod: "services/rtpSplitter/rtpSplitterChannels",
+				 httpMethod:"GET"
+			}).success(function(response) {
+					$scope.channel = response;
+			});
+			$scope.udpateChannels = function(){
+			var data = { inputTCPChannel: $scope.channel.inputTCPChannel,
+                        outputTCPChannel: $scope.channel.outputTCPChannel,
+						inputUDPChannel: $scope.channel.inputUDPChannel,
+                        outputUDPChannel: $scope.channel.outputUDPChannel,
+						inputTCPChannelPort: $scope.channel.inputTCPChannelPort,
+                        outputTCPChannelPort: $scope.channel.outputTCPChannelPort,
+						inputUDPChannelPort: $scope.channel.inputUDPChannelPort,
+                        outputUDPChannelPort: $scope.channel.outputUDPChannelPort,
+						defaultBuffer_fetchGracePeriod: $scope.channel.defaultBuffer_fetchGracePeriod,
+						defaultBuffer_bufferTime: $scope.channel.defaultBuffer_bufferTime,
+						defaultBuffer_processMissingPackets: $scope.channel.defaultBuffer_processMissingPackets,
+						maxBuffer_bufferTime: $scope.channel.maxBuffer_bufferTime,
+						maxBuffer_fetchGracePeriod: $scope.channel.maxBuffer_fetchGracePeriod,
+						maxBuffer_processMissingPackets: $scope.channel.maxBuffer_processMissingPackets
+                    };
+				apiService.request({
+                    httpMethod: "POST",
+                    apiMethod:"services/rtpSplitter/rtpSplitterChannels",
+                    params:data
+				}).success(function(response) {
+					console.log(response);
+				});
+			}
+	   });
+	   
+	   deviceApp.controller('bufferController',function($scope, apiService){
+			apiService.request({
+				 apiMethod: "services/rtpSplitter/bufferSettings",
+				 httpMethod:"GET"
+			}).success(function(response) {
+					$scope.buffer = response;
+			});
+			$scope.updateBufferSettings = function(){
+			var data = { 
+					fetchSequence:$scope.buffer.fetchSequence,
+					insertSequence:$scope.buffer.insertSequence,
+					resetCount:$scope.buffer.resetCount,
+					missingWindowStart:$scope.buffer.missingWindowStart,
+					missingWindowPeriods:$scope.buffer.missingWindowPeriods,
+					missingSequence:$scope.buffer.missingSequence,
+					missingSequenceNo:$scope.buffer.missingSequenceNo,
+					insertTime:$scope.buffer.insertTime,
+					fetchTime:$scope.buffer.fetchTime,
+					lastMissingSequenceProcessed:$scope.buffer.lastMissingSequenceProcessed,
+					missingSeqThreshold:$scope.buffer.missingSeqThreshold
+                    };
+				apiService.request({
+                    httpMethod: "POST",
+                    apiMethod:"services/rtpSplitter/bufferSettings",
+                    params:data
+				}).success(function(response) {
+					console.log(response);
+				});
+			}
+	   });
+
+	   </script>
+   </head>
+   <body>
+   		<div id="wrapper" data-ng-controller="SimpleController">
+
+	        <!-- Navigation -->
+	        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+	            <div class="navbar-header">
+	                <a class="navbar-brand" href="index.html">Device Admin</a>
+	            </div>
+	            <!-- /.navbar-header -->
+
+	            <ul class="nav navbar-top-links navbar-right">
+	                
+	                <!-- /.dropdown -->
+	                <li class="dropdown">
+	                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+	                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+	                    </a>
+	                    <ul class="dropdown-menu dropdown-user">
+	                        <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+	                        </li>
+	                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+	                        </li>
+	                        <li class="divider"></li>
+	                        <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+	                        </li>
+	                    </ul>
+	                    <!-- /.dropdown-user -->
+	                </li>
+	                <!-- /.dropdown -->
+	            </ul>
+	            <!-- /.navbar-top-links -->
+
+	            <div class="navbar-default sidebar" role="navigation">
+	                <div class="sidebar-nav navbar-collapse">
+	                    <ul class="nav" id="side-menu">
+	                        <li>
+	                            <device-tree id="deviceTree"></device-tree>
+	                        </li>
+							 <li><a href="#channels">Channels</a></li>
+							 <li><a href="#bufferSettings">Buffer Settings</a></li>
+	                    </ul>
+	                </div>
+	                <!-- /.sidebar-collapse -->
+	            </div>
+	            <!-- /.navbar-static-side -->
+	        </nav>
+
+	        <div id="page-wrapper">
+	            <div class="row">
+	                <div class="col-lg-12">
+	                    <div data-ng-view></div>
+	                </div>
+	            </div>
+	        </div>
+    	</div>
+	<body>
+</html>
