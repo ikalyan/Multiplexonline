@@ -12,16 +12,16 @@
 	   <link href="stylesheet/sb-admin-2.css" rel="stylesheet">
 	   <link href="stylesheet/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 	   
-
 	   <script src="javascript/jquery.js"></script>
 	   <script src="javascript/bootstrap.min.js"></script>
 	   <script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
 	   <script src="javascript/angular-route.js"></script>
 	   <script src="javascript/apiService.js"></script>
+	   <script src="javascript/ng-upload.js"></script>
 	   <script src="javascript/jstree/jquery.jstree.js"></script>
 	   
 	   <script language="javascript">
-	   var deviceApp = angular.module('deviceApp',['ngRoute','ApiModule']);
+	   var deviceApp = angular.module('deviceApp',['ngRoute','ApiModule','ngUpload']);
 	   
 	    deviceApp.config(function($routeProvider){
 		$routeProvider.when("/",{
@@ -35,7 +35,11 @@
 			.when('/bufferSettings',{
 				controller:'bufferController',
 				templateUrl:'bufferSettings.html'
-				});
+			})
+			.when('/uploadFile',{
+				controller:'uploadFileController',
+				templateUrl:'uploadFile.html'
+			});
 		});
    
 	   deviceApp.directive('deviceTree', function(apiService) {
@@ -169,7 +173,29 @@
 				});
 			}
 	   });
-
+	   deviceApp.controller('uploadFileController',function($scope, apiService){
+		   $scope.uploadFile = function () {
+		   $("form#myform").submit(function(e){
+			   //grab all form data  
+			   var formData = new FormData($(this)[0]);
+			  
+			   $.ajax({
+			     url: 'http://localhost:8080/navyaentertainment/services/rtpSplitter/upload',
+			     type: 'POST',
+			     data: formData,
+			     async: false,
+			     cache: false,
+			     contentType: false,
+			     processData: false,
+			     success: function (returndata) {
+			       alert("SUCCESS");
+			       location.reload();
+			     }
+			   });
+			   return false;
+			 });	
+          };
+	   });
 	   </script>
    </head>
    <body>
@@ -214,6 +240,7 @@
 	                        </li>
 							 <li><a href="#channels">Channels</a></li>
 							 <li><a href="#bufferSettings">Buffer Settings</a></li>
+							 <li><a href="#uploadFile">Upload File</a></li>
 	                    </ul>
 	                </div>
 	                <!-- /.sidebar-collapse -->

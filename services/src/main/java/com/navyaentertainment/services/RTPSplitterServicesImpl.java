@@ -6,10 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 public class RTPSplitterServicesImpl implements RTPSplitterServices {
+	
+	protected static Logger logger = Logger.getLogger(RTPSplitterServicesImpl.class);
 	
 	private File propertyFile;
 	
@@ -38,13 +41,13 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 			prop.store(output, null);
 
 		} catch (IOException io) {
-			io.printStackTrace();
+			logger.error(io.getMessage());
 		} finally {
 			if (output != null) {
 				try {
 					output.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			}
 		}
@@ -74,13 +77,13 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 			channel.setMaxBuffer_processMissingPackets(prop.getProperty(RTPSplitterConstant.MAXBUFFER_PROCESSMISSINGPACKETS));
 			
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			logger.error(ex.getMessage());
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			}
 		}
@@ -116,13 +119,13 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 			prop.store(output, null);
 
 		} catch (IOException io) {
-			io.printStackTrace();
+			logger.error(io.getMessage());
 		} finally {
 			if (output != null) {
 				try {
 					output.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			}
 		}
@@ -150,13 +153,13 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 			
 			
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			logger.error(ex.getMessage());
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			}
 		}
@@ -166,5 +169,38 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 	@Override
 	public void setPropertyFile(File file) {
 		this.propertyFile = file;
+	}
+
+	@Override
+	public void updateUploadFileLocation(String fileLocation) {
+		Properties prop = new Properties();
+		OutputStream output = null;
+		try {
+			File file = new File(getFileName());
+			output = new FileOutputStream(file);
+			prop.setProperty(RTPSplitterConstant.UPLOADFILE, fileLocation);
+			prop.store(output, null);
+		}catch (IOException io) {
+			logger.error(io.getMessage());
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+				}
+			}
+		}
+	}
+	private String getFileName() throws IOException{
+		File file = new File(RTPSplitterConstant.DIRECTORY);
+		if(!file.exists()){
+			file.mkdir();
+		}
+		file = new File(RTPSplitterConstant.COMPLETE_PATH_PROPERTY_FILE);
+		if(!file.exists()){
+			file.createNewFile();
+		}
+		return RTPSplitterConstant.COMPLETE_PATH_PROPERTY_FILE;
 	}
 }

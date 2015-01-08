@@ -16,5 +16,6 @@ public interface RTPSplitterServices {
 	BufferDomain getBufferSettings();
 	
 	void setPropertyFile(File file);
-
+	
+	void updateUploadFileLocation(String fileLocation);
 }
