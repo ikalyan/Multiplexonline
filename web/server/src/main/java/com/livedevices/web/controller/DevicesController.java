@@ -2,12 +2,10 @@ package com.livedevices.web.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.navyaentertainment.App;
 import com.navyaentertainment.Interfaces;
+import com.navyaentertainment.RTPTCPClient;
 import com.navyaentertainment.services.BufferDomain;
 import com.navyaentertainment.services.RTPSplitterChannelDomain;
 import com.navyaentertainment.services.RTPSplitterConstant;
@@ -35,11 +34,15 @@ public class DevicesController {
 	 
 	private File propertyFile;
 	
+	private List<NetworkInterface> availableNetworkInterface = new ArrayList<NetworkInterface>();
+	
 	@PostConstruct
 	public void init() {
 		URL url = getClass().getResource(RTPSplitterConstant.FILE_NAME);
 		this.propertyFile = new File(url.getPath());
 		rtpSplitterServices.setPropertyFile(propertyFile);
+		Interfaces interfaces = new Interfaces();
+		availableNetworkInterface = interfaces.getNetworkInterfaces();
 	}
 	
 	@Autowired
@@ -48,20 +51,35 @@ public class DevicesController {
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
 	public List<AvailableChannels> explore() throws IOException {
-		Interfaces interfaces = new Interfaces();
-		ArrayList<NetworkInterface> address = interfaces.getNetworkInterfaces();
+		
 		List<AvailableChannels> availableChannels = new ArrayList<AvailableChannels>();
-		for (NetworkInterface networkInterface : address) {
+		for (NetworkInterface networkInterface : availableNetworkInterface) {
 			AvailableChannels channel = new AvailableChannels();
 			channel.setDisplayName(networkInterface.getDisplayName());
 			channel.setName(networkInterface.getName());
 			channel.setAddrs(networkInterface.getInterfaceAddresses());
 			availableChannels.add(channel);
 		}
-		//List<InetAddress> inetAddress = interfaces.getInetAddresses();
-		//List<String> hostNames = new ArrayList<String>();
-		//String address = "[{\"data\":\"Devices\",\"attr\":\"0\",\"children\":[{\"attr\":{\"id\":\"1\"},\"data\":\"DVB-S/DVB-S2/MPEG-2\"},{\"attr\":{\"id\":\"2\"},\"data\":\"CAS modules\"},{\"attr\":{\"id\":\"3\"},\"data\":\"CVBS/RGB/YPbPr, \"},{\"attr\":{\"id\":\"4\"},\"data\":\"USB2.0 port, \"},{\"attr\":{\"id\":\"5\"},\"data\":\"PVR, \"},{\"attr\":{\"id\":\"6\"},\"data\":\"Multimedia player\"},{\"attr\":{\"id\":\"7\"},\"data\":\"SCPC and MCPC\"},{\"attr\":{\"id\":\"8\"},\"data\":\"DiSEqC 1.0/1.1/1.2/1.3 (USALS)\"},{\"attr\":{\"id\":\"9\"},\"data\":\"LNB, NIT search\"},{\"attr\":{\"id\":\"10\"},\"data\":\"Softwareupgrade over OTA\"},{\"attr\":{\"id\":\"11\"},\"data\":\"DiSEqC1.0/DiSEqC1.2\"},{\"attr\":{\"id\":\"12\"},\"data\":\"EPG,\"},{\"attr\":{\"id\":\"13\"},\"data\":\"VBI teletext\"},{\"attr\":{\"id\":\"14\"},\"data\":\"F950 to 2,150MHz\"},{\"attr\":{\"id\":\"15\"},\"data\":\"auto/manual program search\"},{\"attr\":{\"id\":\"16\"},\"data\":\"Multiple Languages\"},{\"attr\":{\"id\":\"17\"},\"data\":\"USB2.0 for PVR\"},{\"attr\":{\"id\":\"18\"},\"data\":\"LDPC/BCH \"},{\"attr\":{\"id\":\"19\"},\"data\":\"VHF & HUF bands\"}]}]";
 		return availableChannels;
+	}
+	
+	@RequestMapping(value = "/pingStatus", method = RequestMethod.GET)
+	@ResponseBody
+	public boolean getPingStatus(@RequestParam("network_name") String name) throws Exception {
+		//System.out.println(addrs.size());
+		for (NetworkInterface networkInterface : availableNetworkInterface) {
+			if(networkInterface.getName().equals(name)){
+				RTPTCPClient rtptcpClient = new RTPTCPClient(networkInterface);
+				//rtptcpClient.connect();
+				System.out.println(rtptcpClient.getAveragePingRecieveTime());
+				System.out.println(rtptcpClient.getAveragePingResponseTime());
+				System.out.println(rtptcpClient.getAveragePingRTT());
+				System.out.println(rtptcpClient.getPendingRequestCount());
+				System.out.println(rtptcpClient.getPingRequestSize());
+			}
+		}
+		
+		return true;
 	}
 	
 	@RequestMapping(value = "/rtpSplitterChannels", method = RequestMethod.GET)

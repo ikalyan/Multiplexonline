@@ -50,7 +50,7 @@
 						var treeNodes = [];
 						treeNodes.push({"data":"Available channels","id":"0","children":[]});
 						angular.forEach(response, function(inetAddress){
-							treeNodes[0].children.push({"data":inetAddress.displayName,"attr":{"id":inetAddress.addrs}})
+							treeNodes[0].children.push({"data":inetAddress.displayName,"attr":{"id":inetAddress.name}})
 						});
 	    				treeElement.jstree({ 
 						"json_data" : {
@@ -88,9 +88,18 @@
 	    			});
 					treeElement.on("click",function (e) { 
 						var li = $(e.target).closest("li");
-						var childScope = angular.element($("#channels_list_id")).scope();
-						scope.$root.content = li[0].textContent; 
-						scope.$root.$apply();
+						if(li[0].id!="0"){
+							apiService.request({
+			                    httpMethod: "GET",
+			                    apiMethod:"services/rtpSplitter/pingStatus",
+			                    params:{"network_name":li[0].id}
+							}).success(function(response) {
+								console.log(response);
+							});
+							var childScope = angular.element($("#channels_list_id")).scope();
+							scope.$root.content = li[0].textContent; 
+							scope.$root.$apply();
+						}
 					});
 	            }
 	        }
