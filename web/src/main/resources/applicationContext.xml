@@ -23,8 +23,4 @@
 	
 	<bean id="rtpSplitterServices" class="com.navyaentertainment.services.RTPSplitterServicesImpl"/>
 	
-	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-    	<property name="maxUploadSize" value="268435456"/> <!-- 256 megs -->
-	</bean>
-	<import resource="classpath:services.xml"/>
 </beans>

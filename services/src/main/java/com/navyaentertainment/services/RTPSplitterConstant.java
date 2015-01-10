@@ -34,9 +34,5 @@ public class RTPSplitterConstant {
 	public static final String FETCHTIME="fetchTime";
 	public static final String LASTMISSINGSEQUENCEPROCESSED="lastMissingSequenceProcessed";
 	public static final String MISSINGSEQTHRESHOLD="missingSeqThreshold";
-	public static final String UPLOADFILE="uploadFile";
-	public static final String DIRECTORY="/RTPSplitter";
-	public static final String PROPERTY_FILE_NAME="RTPSplitter.properties";
 	
-	public static String COMPLETE_PATH_PROPERTY_FILE = DIRECTORY+"/"+PROPERTY_FILE_NAME;
 }

@@ -4,29 +4,42 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 						   
-	<bean name="schedulerJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-	<property name="jobClass" value="com.navyaentertainment.services.SchedulerJob" />
-  </bean>
- 
-  <!-- Cron Trigger, run every 10 seconds -->
-  <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-	<property name="jobDetail" ref="schedulerJob" />
-	<property name="cronExpression" value="0/10 * * * * ?" />
-  </bean>
- 
-  <!-- DI -->
-  <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-	<property name="jobDetails">
-		<list>
-			<ref bean="schedulerJob" />
-		</list>
-	</property>
- 
-	<property name="triggers">
-		<list>
-			<ref bean="cronTrigger" />
-		</list>
-	</property>
-  </bean>	
+	
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		p:location="/resources/jdbc.properties" />
+
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+		p:driverClassName="${jdbc.driverClassName}"
+		p:url="${jdbc.databaseurl}" p:username="${jdbc.username}"
+		p:password="${jdbc.password}" />
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation">
+			<value>resources/hibernate.cfg.xml</value>
+		</property>
+		<property name="configurationClass">
+			<value>org.hibernate.cfg.AnnotationConfiguration</value>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${jdbc.dialect}</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- 
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+			 	-->
+			</props>
+		</property>
+	</bean>
+	
+	<tx:annotation-driven />
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 
 </beans>
