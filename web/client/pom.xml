@@ -122,13 +122,6 @@
         <artifactId>jackson-core-asl</artifactId>
         <version>${jackson.version}</version>
     </dependency>
-	<dependency>
-      <groupId>com.navyaentertainment.devices</groupId>
-      <artifactId>server</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <type>war</type>
-      <scope>runtime</scope>
-    </dependency>
   </dependencies>
 
   <build>
