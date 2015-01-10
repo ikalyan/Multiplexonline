@@ -2,7 +2,7 @@
 
 var apiModule = angular.module('ApiModule', []);
 apiModule.factory('apiService', ['$http', function($http) {
-	var basePath="http://localhost:8080/navyaentertainment/";
+	var basePath="http://localhost:8080/navyaentertainment-server/";
 	var _httpMethod="POST";
 	var caching=false;
 	$http.defaults.withCredentials = true;
