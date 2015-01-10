@@ -4,7 +4,7 @@
   <groupId>com.navyaentertainment.devices</groupId>
   <artifactId>navyaentertainment</artifactId>
   <packaging>pom</packaging>
-  <version>${project.version}</version>
+  <version>0.1-SNAPSHOT</version>
   <name>navya entertainment</name>
  <url>http://www.springframework.org</url>
  
