@@ -76,7 +76,7 @@ public class RemoteManagementServer {
     public static final int PORT = 7777;
     
     final private TCPNIOTransport transport = TCPNIOTransportBuilder.newInstance().build();
-    boolean isBound = false;
+    boolean isBound = true;
 
     public RemoteManagementServer() {
     	 // Create a FilterChain using FilterChainBuilder

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.navyaentertainment.Interfaces;
 import com.navyaentertainment.RTPTCPClient;
+import com.navyaentertainment.ServerApp;
 import com.navyaentertainment.services.BufferDomain;
 import com.navyaentertainment.services.RTPSplitterChannelDomain;
 import com.navyaentertainment.services.RTPSplitterConstant;
@@ -37,11 +38,11 @@ public class DevicesController {
 	
 	@PostConstruct
 	public void init() {
-		URL url = getClass().getResource(RTPSplitterConstant.FILE_NAME);
-		this.propertyFile = new File(url.getPath());
-		rtpSplitterServices.setPropertyFile(propertyFile);
-		Interfaces interfaces = new Interfaces();
-		availableNetworkInterface = interfaces.getNetworkInterfaces();
+		//URL url = getClass().getResource(RTPSplitterConstant.FILE_NAME);
+		//this.propertyFile = new File(url.getPath());
+		//rtpSplitterServices.setPropertyFile(propertyFile);
+		//Interfaces interfaces = new Interfaces();
+		//availableNetworkInterface = interfaces.getNetworkInterfaces();
 	}
 	
 	@Autowired
@@ -115,9 +116,9 @@ public class DevicesController {
 			//App app =new App();
 			//app.stop();
 		}else{
-			RTPSplitterChannelDomain channelDomain = rtpSplitterServices.getRTPSChannel();
-			//App app =new App(channelDomain);
-			//app.start();
+			//RTPSplitterChannelDomain channelDomain = rtpSplitterServices.getRTPSChannel();
+			ServerApp app =new ServerApp();
+			app.start();
 		}
 		return true;
 	}
