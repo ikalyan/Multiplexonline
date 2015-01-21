@@ -1,4 +1,4 @@
-package com.livedevices.web.controller;
+package com.livedevices.web.server.controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.navyaentertainment.ClientApp;
 import com.navyaentertainment.Interfaces;
 import com.navyaentertainment.RTPTCPClient;
+import com.navyaentertainment.ServerApp;
 import com.navyaentertainment.services.BufferDomain;
 import com.navyaentertainment.services.RTPSplitterChannelDomain;
 import com.navyaentertainment.services.RTPSplitterConstant;
@@ -113,11 +113,11 @@ public class DevicesController {
 	public boolean startServer(@RequestParam("state") String state) throws Exception {
 		
 		if(state =="Stop"){
-			//ClientApp app =new ClientApp();
+			//App app =new App();
 			//app.stop();
 		}else{
 			//RTPSplitterChannelDomain channelDomain = rtpSplitterServices.getRTPSChannel();
-			ClientApp app =new ClientApp();
+			ServerApp app =new ServerApp();
 			app.start();
 		}
 		return true;

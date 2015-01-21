@@ -19,7 +19,7 @@ public class RTPTCPInputStream {
     public static final int PORT = 7777;
     
     final private TCPNIOTransport transport = TCPNIOTransportBuilder.newInstance().build();
-    boolean isBound = true;
+    boolean isBound = false;
 
     
     

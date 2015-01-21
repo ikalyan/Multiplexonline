@@ -1,4 +1,4 @@
-package com.livedevices.web.controller;
+package com.livedevices.web.client.controller;
 
 import java.net.InterfaceAddress;
 import java.util.List;
