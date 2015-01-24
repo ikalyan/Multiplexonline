@@ -104,7 +104,7 @@
       </dependency>
 	<dependency>
 		<groupId>com.navyaentertainment.devices</groupId>
-		<artifactId>clientServices</artifactId>
+		<artifactId>services</artifactId>
 		<version>${project.version}</version>
 	</dependency>
 	<dependency>
