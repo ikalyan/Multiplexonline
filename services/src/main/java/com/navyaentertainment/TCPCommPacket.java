@@ -21,6 +21,7 @@ public class TCPCommPacket {
 	int type;
 	byte[] message = new byte[1500];
 	long sendTime = 0;
+	long recieveTime = 0;
 
 	public TCPCommPacket(byte[] message, int messageSize, int timeSeq, int type) {
 		this.message = message;
@@ -82,6 +83,7 @@ public class TCPCommPacket {
 
 	    readHeader(sourceBuffer);
 	    readMessage(sourceBuffer);
+	    recieveTime = new Date().getTime();
 		return completeMessageLength;
 	}
 	

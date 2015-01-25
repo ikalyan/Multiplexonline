@@ -16,10 +16,11 @@ public class TCPServerFilter extends BaseFilter {
 	public TCPServerFilter(RTPBuffer buffer) {
 		this.rtpBuffer = buffer;
 	}
-	 @Override
+	
+	@Override
     public NextAction handleRead(FilterChainContext ctx) throws IOException {
-		 try {
-			 
+		 try { 
+			RTPTCPServerConnection serverConnection = TCPServerConnectionManager.getInstance().getServerConnection(ctx.getConnection());
 			TCPCommPacket packet = new TCPCommPacket();
 			final Buffer sourceBuffer = ctx.getMessage();
 			int sourceBufferLength = sourceBuffer.remaining();
@@ -41,8 +42,9 @@ public class TCPServerFilter extends BaseFilter {
 	        	        sourceBuffer.split(size) : null;
     	        ctx.setMessage(packet);
 				sourceBuffer.tryDispose();
+				serverConnection.registerPacket(packet);
+				System.out.println(serverConnection.getRTPTCPServerConnectionInfo().toString());
     	        count++;
-				sourceBuffer.tryDispose();
     	        try {
 					if (packet.type == packet.TYPE_RTP) {
 						RTPDatagramPacket dp = new RTPDatagramPacket();
@@ -72,5 +74,18 @@ public class TCPServerFilter extends BaseFilter {
 			 throw e;
 		 }
 	 }
-
+	
+	@Override
+    public NextAction handleAccept(FilterChainContext ctx) throws IOException {
+		System.out.println("Conenction accepted " + ctx.getConnection().toString());
+		TCPServerConnectionManager.getInstance().connectionAccept(ctx.getConnection());
+		return ctx.getInvokeAction();
+	}
+	
+	@Override
+    public NextAction handleClose(FilterChainContext ctx) throws IOException {
+		System.out.println("Conenction closed" + ctx.getConnection().toString());
+		TCPServerConnectionManager.getInstance().connectionClose(ctx.getConnection());
+		return ctx.getInvokeAction();
+	}
 }
