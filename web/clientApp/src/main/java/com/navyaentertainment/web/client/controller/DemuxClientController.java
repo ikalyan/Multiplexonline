@@ -1,4 +1,4 @@
-package com.livedevices.web.client.controller;
+package com.navyaentertainment.web.client.controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,14 +25,14 @@ import com.navyaentertainment.RTPTCPClient;
 import com.navyaentertainment.services.BufferDomain;
 import com.navyaentertainment.services.ClientSettings;
 import com.navyaentertainment.services.RTPSplitterChannelDomain;
-import com.navyaentertainment.services.RTPSplitterConstant;
-import com.navyaentertainment.services.RTPSplitterServices;
+import com.navyaentertainment.services.ClientConfigConstant;
+import com.navyaentertainment.services.DemuxClientServices;
 
 @Controller
-@RequestMapping("/rtpSplitter")
-public class DevicesController {
+@RequestMapping("/deMuxClient")
+public class DemuxClientController {
 
-	protected static Logger logger = Logger.getLogger(DevicesController.class);
+	protected static Logger logger = Logger.getLogger(DemuxClientController.class);
 	 
 	private List<NetworkInterface> availableNetworkInterface = new ArrayList<NetworkInterface>();
 	ClientApp app = null;
@@ -40,11 +40,11 @@ public class DevicesController {
 	
 	@PostConstruct
 	public void init() throws Exception {
-		String fileName = RTPSplitterConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		String fileName = ClientConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
 		File file = new File(fileName);
 		if(file.exists()){
-			ClientSettings clientSettings = rtpSplitterServices.getClientSettings(file);
-			rtpSplitterServices.setClientSettings(clientSettings);
+			ClientSettings clientSettings = demuxClientServices.getClientSettings(file);
+			demuxClientServices.setClientSettings(clientSettings);
 		}
 		app = new ClientApp();
 		app.run();
@@ -55,7 +55,7 @@ public class DevicesController {
     private ServletContext servletContext;
 	
 	@Autowired
-	private RTPSplitterServices rtpSplitterServices;
+	private DemuxClientServices demuxClientServices;
 	
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
@@ -92,37 +92,37 @@ public class DevicesController {
 		return true;
 	}
 	
-	@RequestMapping(value = "/rtpSplitterChannels", method = RequestMethod.GET)
+	@RequestMapping(value = "/channels", method = RequestMethod.GET)
 	@ResponseBody
 	public RTPSplitterChannelDomain getRTPSplitterChannels() throws IOException {
-		RTPSplitterChannelDomain channelDomain = rtpSplitterServices.getRTPSChannel();
+		RTPSplitterChannelDomain channelDomain = demuxClientServices.getRTPSChannel();
 		return channelDomain;
 	}
 	
-	@RequestMapping(value = "/rtpSplitterChannels", method = RequestMethod.POST)
+	@RequestMapping(value = "/channels", method = RequestMethod.POST)
 	@ResponseBody
 	public boolean updateRTPSplitterChannels(@RequestBody RTPSplitterChannelDomain rtpSplitterChannelDomain) throws IOException {
-		return rtpSplitterServices.updateChannels(rtpSplitterChannelDomain);
+		return demuxClientServices.updateChannels(rtpSplitterChannelDomain);
 	}
 	
 	@RequestMapping(value = "/bufferSettings", method = RequestMethod.GET)
 	@ResponseBody
 	public BufferDomain getBufferSettings() throws IOException {
-		BufferDomain bufferDomain = rtpSplitterServices.getBufferSettings();
+		BufferDomain bufferDomain = demuxClientServices.getBufferSettings();
 		return bufferDomain;
 	}
 	
 	@RequestMapping(value = "/bufferSettings", method = RequestMethod.POST)
 	@ResponseBody
 	public boolean updateBufferSettings(@RequestBody BufferDomain bufferDomain) throws IOException {
-		return rtpSplitterServices.updateBufferSettings(bufferDomain);
+		return demuxClientServices.updateBufferSettings(bufferDomain);
 	}
 	
 	@RequestMapping(value = "/startApp", method = RequestMethod.GET)
 	@ResponseBody
 	public boolean startApp(@RequestParam("state") String state) throws Exception {
 		
-		if(state =="Stop"){
+		if(state.equals("Stop")){
 			app.stop();
 			appStatus = false;
 		}else{
@@ -139,12 +139,12 @@ public class DevicesController {
 	@RequestMapping(value = "/clientSettings", method = RequestMethod.POST)
 	@ResponseBody
 	public boolean setIpSettings(@RequestBody ClientSettings clientSettings) throws Exception {
-		String fileName = RTPSplitterConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		String fileName = ClientConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
 		File file = new File(fileName);
 		if(!file.exists()){
 			file.createNewFile();
 		}
-		rtpSplitterServices.updateClientSettings(clientSettings, file);
+		demuxClientServices.updateClientSettings(clientSettings, file);
 		app.stop();
 		app.run();
 		return true;
@@ -152,8 +152,8 @@ public class DevicesController {
 	@RequestMapping(value = "/clientSettings", method = RequestMethod.GET)
 	@ResponseBody
 	public ClientSettings getClientSettings() throws Exception {
-		String fileName = RTPSplitterConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		String fileName = ClientConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
 		File file = new File(fileName);
-		return rtpSplitterServices.getClientSettings(file);
+		return demuxClientServices.getClientSettings(file);
 	}
 }

@@ -5,7 +5,7 @@ import java.io.File;
 import com.navyaentertainment.services.BufferDomain;
 import com.navyaentertainment.services.RTPSplitterChannelDomain;
 
-public interface RTPSplitterServices {
+public interface DemuxClientServices {
 
 	boolean updateChannels(RTPSplitterChannelDomain rtpSplitterChannelDomain);
 	

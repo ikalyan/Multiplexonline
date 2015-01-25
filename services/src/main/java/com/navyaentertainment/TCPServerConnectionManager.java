@@ -1,5 +1,7 @@
 package com.navyaentertainment;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -53,5 +55,14 @@ public class TCPServerConnectionManager {
 		}
 		logger.info("Close : No of connections " + connections.size());
 	}
-
+	
+	public List<RTPTCPServerConnectionInfo> getServerConnectionInfo(){
+		List<RTPTCPServerConnectionInfo> rtptcpServerConnectionInfos = new ArrayList<RTPTCPServerConnectionInfo>();
+		synchronized (TCPServerConnectionManager.class) {
+			for (RTPTCPServerConnection rtptcpServerConnection : connections) {
+				rtptcpServerConnectionInfos.add(rtptcpServerConnection.getRTPTCPServerConnectionInfo());
+			}
+		}
+		return rtptcpServerConnectionInfos;
+	}
 }

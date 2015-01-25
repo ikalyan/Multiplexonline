@@ -2,7 +2,6 @@
 
 var apiModule = angular.module('ApiModule', []);
 apiModule.factory('apiService', ['$http', function($http) {
-	var basePath="http://localhost:8080/navyaentertainment-server/";
 	var _httpMethod="POST";
 	var caching=false;
 	$http.defaults.withCredentials = true;
@@ -93,7 +92,7 @@ apiModule.factory('apiService', ['$http', function($http) {
 					cache: caching,
 					method: bundle.httpMethod,
 					headers:{"Content-Type":contentType},
-					url:basePath+bundle.apiMethod, 
+					url:bundle.apiMethod, 
 					data:dataStr,
 					transformRequest: angular.identity,
 					transformResponse:bundle.transformResponse
@@ -103,18 +102,12 @@ apiModule.factory('apiService', ['$http', function($http) {
 					cache: caching,
 					method: bundle.httpMethod,
 					headers:{"Content-Type":contentType},
-					url:basePath+bundle.apiMethod, 
+					url:bundle.apiMethod, 
 					data:dataStr,					
 					transformResponse:bundle.transformResponse
 				});
 			}
 			//TODO: attach default error handlers
-		},
-		getBasePath: function(){
-			return basePath;
-		},
-		setBasePath: function(bp){
-			basePath=bp;
 		},
 		getHttpMethod: function(){
 			return _httpMethod;

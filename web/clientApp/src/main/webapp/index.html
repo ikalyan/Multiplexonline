@@ -49,7 +49,7 @@
 	   	$scope.$root.content = "Dashboard";
 	   	$scope.serverStatus = "Start"
    		apiService.request({
-			 apiMethod: "services/rtpSplitter/getAppStatus",
+			 apiMethod: "services/deMuxClient/getAppStatus",
 			 httpMethod:"GET"
 		}).success(function(response) {
 				if(response == true)
@@ -60,7 +60,7 @@
    		$scope.serverStatus="Stop";
 	   	$scope.startServer = function(){
 	   		apiService.request({
-				 apiMethod: "services/rtpSplitter/startApp",
+				 apiMethod: "services/deMuxClient/startApp",
 				 httpMethod:"GET",
 				 params:{state:$scope.serverStatus}
 			}).success(function(response) {
@@ -75,7 +75,7 @@
 	   });
 	   deviceApp.controller('clientSettings',function($scope, apiService){
 		   apiService.request({
-				 apiMethod: "services/rtpSplitter/clientSettings",
+				 apiMethod: "services/deMuxClient/clientSettings",
 				 httpMethod:"GET"
 			}).success(function(response) {
 				$scope.serverIp = response.serverIP;
@@ -90,7 +90,7 @@
 		   		}
 		   		apiService.request({
                     httpMethod: "POST",
-                    apiMethod:"services/rtpSplitter/clientSettings",
+                    apiMethod:"services/deMuxClient/clientSettings",
                     params:data
 				}).success(function(response) {
 					console.log(response);
@@ -101,7 +101,7 @@
 	   deviceApp.controller('interfaceSettings',function($scope, apiService){
 		   apiService.request({
 				httpMethod:"GET",
-				apiMethod: "services/rtpSplitter/list"
+				apiMethod: "services/deMuxClient/list"
 			}).success(function(response) {
 				$scope.interfaces=[];
 				angular.forEach(response, function(network){
@@ -121,7 +121,7 @@
 	   });
 	   deviceApp.controller('channelController',function($scope, apiService){
 			apiService.request({
-				 apiMethod: "services/rtpSplitter/rtpSplitterChannels",
+				 apiMethod: "services/deMuxClient/channels",
 				 httpMethod:"GET"
 			}).success(function(response) {
 					$scope.channel = response;
@@ -144,7 +144,7 @@
                     };
 				apiService.request({
                     httpMethod: "POST",
-                    apiMethod:"services/rtpSplitter/rtpSplitterChannels",
+                    apiMethod:"services/rtpSplitter/channels",
                     params:data
 				}).success(function(response) {
 					console.log(response);

@@ -15,7 +15,9 @@ public class ServerApp {
 	protected static Logger logger = Logger.getLogger(ServerApp.class);
 	private static RTPBuffer buffer = new RTPBuffer(250, 1000, false);
 	private static RTPBuffer muxBuffer = new RTPBuffer(5000, 250, true);
-
+	private Thread[] appThreads;
+	RTPOutputStream outputStream = null;
+	RTPTCPInputStream inputStream = null;
 	public void start() throws Exception {
 		Thread[] threads = {
 
@@ -26,8 +28,8 @@ public class ServerApp {
 					InetAddress address = null;
 					try {
 						address = InetAddress.getByName("127.0.0.1");
-						RTPOutputStream stream = new RTPOutputStream(address, address, port);
-						stream.send(muxBuffer);
+						outputStream = new RTPOutputStream(address, address, port);
+						outputStream.send(muxBuffer);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -42,8 +44,8 @@ public class ServerApp {
 					InetAddress address = null;
 					try {
 						address = InetAddress.getByName("0.0.0.0");
-						RTPTCPInputStream stream = new RTPTCPInputStream(muxBuffer);
-						stream.bind();
+						inputStream = new RTPTCPInputStream(muxBuffer);
+						inputStream.bind();
 						while (true) {
 							Thread.sleep(100);
 						}
@@ -53,20 +55,9 @@ public class ServerApp {
 					}
 
 				}), };
-
+		appThreads = threads;
 		// Start all threads
-		Arrays.stream(threads).forEach(Thread::start);
-
-		// Join all threads
-		Arrays.stream(threads).forEach(t -> {
-
-			try {
-				logger.info("Wating for thread to Join " + t.getName());
-				t.join();
-			} catch (InterruptedException ignore) {
-			}
-		});
-
+		Arrays.stream(appThreads).forEach(Thread::start);
 	}
 
 	public static void readRTPStreamToBuffer() {
@@ -100,5 +91,11 @@ public class ServerApp {
 
 	public static void sendRTPStream() {
 
+	}
+	
+	public void stop() throws Exception{
+		outputStream.unbind();
+		inputStream.shutdown();
+		Arrays.stream(appThreads).forEach(Thread::stop);
 	}
 }

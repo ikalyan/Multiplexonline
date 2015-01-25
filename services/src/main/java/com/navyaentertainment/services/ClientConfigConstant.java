@@ -1,6 +1,6 @@
 package com.navyaentertainment.services;
 
-public class RTPSplitterConstant {
+public class ClientConfigConstant {
 	
 	public static final String UDPPORT ="udpPort";
 	public static final String SERVERIP ="serverIP";
