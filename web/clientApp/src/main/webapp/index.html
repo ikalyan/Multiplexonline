@@ -28,6 +28,13 @@
 			controller:'SimpleController',
 			template:'<h1 class="page-header" id="channels_list_id">{{$root.content}}</h1>'
 			})
+			.when('/clientSettings',{
+				controller:'clientSettings',
+				templateUrl:'clientSettings.html'
+			}).when('/interfaceSettings',{
+				controller:'interfaceSettings',
+				templateUrl:'interfaceSettings.html'
+			})
 			.when('/channels',{
 				controller:'channelController',
 				templateUrl:'channels.html'
@@ -38,87 +45,79 @@
 				});
 		});
    
-	   deviceApp.directive('deviceTree', function(apiService) {
-	       return {
-	            restrict: 'E',
-	            link: function(scope, element) {
-	            	var treeElement = $(element);
-	            	apiService.request({
-						httpMethod:"GET",
-						apiMethod: "services/rtpSplitter/list"
-					}).success(function(response) {
-						var treeNodes = [];
-						treeNodes.push({"data":"Available channels","id":"0","children":[]});
-						angular.forEach(response, function(inetAddress){
-							treeNodes[0].children.push({"data":inetAddress.displayName,"attr":{"id":inetAddress.name}})
-						});
-	    				treeElement.jstree({ 
-						"json_data" : {
-							"data" : treeNodes
-						},
-						"themes" : {
-							"theme" : "default",
-							"dots" : false,
-							"icons" : false
-                        },
-                        "contextmenu":{         
-						    "items": function($node) {
-						        return {
-						            "EnableDevice": {
-						                "separator_before": false,
-						                "separator_after": false,
-						                "label": "Enable Device",
-						                "action": function (obj) {
-						                    alert(obj[0].textContent + " device enabled");
-						                }
-						            },
-						            "DisableDevice": {
-						                "separator_before": false,
-						                "separator_after": false,
-						                "label": "Disable Device",
-						                "action": function (obj) {
-						                   alert(obj[0].textContent + " device disabled");
-						                }
-						            }
-						        };
-						    }
-						},
-						"plugins" : [ "themes", "json_data","contextmenu"]
-						});
-	    			});
-					treeElement.on("click",function (e) { 
-						var li = $(e.target).closest("li");
-						if(li[0].id!="0"){
-							apiService.request({
-			                    httpMethod: "GET",
-			                    apiMethod:"services/rtpSplitter/pingStatus",
-			                    params:{"network_name":li[0].id}
-							}).success(function(response) {
-								console.log(response);
-							});
-							var childScope = angular.element($("#channels_list_id")).scope();
-							scope.$root.content = li[0].textContent; 
-							scope.$root.$apply();
-						}
-					});
-	            }
-	        }
-	    });
 	   deviceApp.controller('SimpleController',function($scope, apiService){
 	   	$scope.$root.content = "Dashboard";
 	   	$scope.serverStatus = "Start"
+   		apiService.request({
+			 apiMethod: "services/rtpSplitter/getAppStatus",
+			 httpMethod:"GET"
+		}).success(function(response) {
+				if(response == true)
+					$scope.serverStatus= "Stop";
+				else
+					$scope.serverStatus= "Start";
+		});
+   		$scope.serverStatus="Stop";
 	   	$scope.startServer = function(){
 	   		apiService.request({
-				 apiMethod: "services/rtpSplitter/startServer",
+				 apiMethod: "services/rtpSplitter/startApp",
 				 httpMethod:"GET",
 				 params:{state:$scope.serverStatus}
 			}).success(function(response) {
-					alert("server running....")
-					$scope.serverStatus="Stop";
+					if(response == true)
+						$scope.serverStatus="Stop";
+					else
+						$scope.serverStatus="Start";
+					
 			});
 	   		$scope.serverStatus="Stop";
 	   	}
-	   	
+	   });
+	   deviceApp.controller('clientSettings',function($scope, apiService){
+		   apiService.request({
+				 apiMethod: "services/rtpSplitter/clientSettings",
+				 httpMethod:"GET"
+			}).success(function(response) {
+				$scope.serverIp = response.serverIP;
+				$scope.serverPort = response.serverPort;
+				$scope.updListenerPort = response.udpPort;
+			});
+		   	$scope.save = function(){
+		   		var data = {
+		   				"serverIP": $scope.serverIp,
+		   				"serverPort": $scope.serverPort,
+		   				"udpPort":$scope.updListenerPort
+		   		}
+		   		apiService.request({
+                    httpMethod: "POST",
+                    apiMethod:"services/rtpSplitter/clientSettings",
+                    params:data
+				}).success(function(response) {
+					console.log(response);
+				});
+		   	}
+		});
+	   
+	   deviceApp.controller('interfaceSettings',function($scope, apiService){
+		   apiService.request({
+				httpMethod:"GET",
+				apiMethod: "services/rtpSplitter/list"
+			}).success(function(response) {
+				$scope.interfaces=[];
+				angular.forEach(response, function(network){
+					interface = {'displayName':network.displayName,'name':network.name};
+					angular.forEach(network.addrs, function(addr){
+						if(addr.broadcast != null){
+							interface.address = addr.address;
+						}
+					});
+					$scope.interfaces.push(interface);
+				});
+			});
+		   $scope.interfaceApply = function(){
+			   alert("Not yet implimented");
+		   }
+		   
 	   });
 	   deviceApp.controller('channelController',function($scope, apiService){
 			apiService.request({
@@ -223,13 +222,11 @@
 	            <div class="navbar-default sidebar" role="navigation">
 	                <div class="sidebar-nav navbar-collapse">
 	                    <ul class="nav" id="side-menu">
-	                        <li>
-	                            <device-tree id="deviceTree">
-	                            	<img ng-src="javascript/jstree/throbber.gif"/>
-	                            </device-tree>
-	                        </li>
-							 <li><a href="#channels">Channels</a></li>
-							 <li><a href="#bufferSettings">Buffer Settings</a></li>
+	                        <li><a href="#clientSettings">IP Settings</a></li>
+	                         <li><a href="#interfaceSettings">Interface Settings</a></li>
+							 <!-- <li><a href="#channels">Channels</a></li>
+							 
+							 <li><a href="#bufferSettings">Buffer Settings</a></li>-->
 	                    </ul>
 	                </div>
 	                <!-- /.sidebar-collapse -->

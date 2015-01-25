@@ -6,6 +6,8 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import com.navyaentertainment.services.ClientConfigSettings;
+
 /**
  * Hello world!
  *
@@ -14,19 +16,21 @@ public class ClientApp {
 
 	protected static Logger logger = Logger.getLogger(ClientApp.class);
 	private static RTPBuffer buffer = new RTPBuffer(250, 1000, false);
-
-	public void start() throws Exception {
+	private Thread[] clientThread;
+	RTPInputStream stream = null;
+	public void run() {
+		
 		Thread[] threads = {
 
 				// Pass a lambda 
 				new Thread(() -> {
 					logger.info("Reading thread from Input");
 					// readRTPStreamToBuffer();
-						int port = 9000;
+						int port = ClientConfigSettings.udpPort == null ? 9000 : Integer.parseInt(ClientConfigSettings.udpPort);
 						InetAddress address = null;
 						try {
 							address = InetAddress.getByName("0.0.0.0");
-							RTPInputStream stream = new RTPInputStream(address, port);
+							stream = new RTPInputStream(address, port);
 							stream.recieve(buffer);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -48,19 +52,19 @@ public class ClientApp {
 						}
 
 					}) };
-
+		clientThread = threads;
 		// Start all threads
-		Arrays.stream(threads).forEach(Thread::start);
+		Arrays.stream(clientThread).forEach(Thread::start);
 
 		// Join all threads
-		Arrays.stream(threads).forEach(t -> {
-
-			try {
-				logger.info("Wating for thread to Join " + t.getName());
-				t.join();
-			} catch (InterruptedException ignore) {
-			}
-		});
+//		Arrays.stream(clientThread).forEach(t -> {
+//
+//			try {
+//				logger.info("Wating for thread to Join " + t.getName());
+//				t.join();
+//			} catch (InterruptedException ignore) {
+//			}
+//		});
 
 	}
 
@@ -96,4 +100,10 @@ public class ClientApp {
 	public static void sendRTPStream() {
 
 	}
+	
+	public void stop(){
+		stream.unbound();
+		Arrays.stream(clientThread).forEach(Thread::stop);
+	}
+	
 }

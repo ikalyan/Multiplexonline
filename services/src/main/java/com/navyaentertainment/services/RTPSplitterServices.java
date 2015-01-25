@@ -16,5 +16,10 @@ public interface RTPSplitterServices {
 	BufferDomain getBufferSettings();
 	
 	void setPropertyFile(File file);
-
+	
+	boolean updateClientSettings(ClientSettings clientSettings, File file);
+	
+	ClientSettings getClientSettings(File file);
+	
+	void setClientSettings(ClientSettings clientSettings);
 }

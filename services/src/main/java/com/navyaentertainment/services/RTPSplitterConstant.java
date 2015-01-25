@@ -1,19 +1,12 @@
 package com.navyaentertainment.services;
 
 public class RTPSplitterConstant {
-	public static final String INPUT_TCP_CHANNEL_KEY="inputTCPChannel";
-	public static final String INPUT_TCP_PORT_KEY="inputTCPChannelPort";
-
-	public static final String OUTPUT_TCP_CHANNEL_KEY="outputTCPChannel";
-	public static final String OUTPUT_TCP_PORT_KEY="outputTCPChannelPort";
-
-	public static final String INPUT_UDP_CHANNEL_KEY="inputUDPChannel";
-	public static final String INPUT_UDP_PORT_KEY="inputUDPChannelPort";
 	
-	public static final String OUTPUT_UDP_CHANNEL_KEY="outputUDPChannel";
-	public static final String OUTPUT_UDP_PORT_KEY="outputUDPChannelPort";
+	public static final String UDPPORT ="udpPort";
+	public static final String SERVERIP ="serverIP";
+	public static final String SERVERPORT ="serverPort";
 	
-	public static final String FILE_NAME ="RTPSplitter.properties";
+	public static final String FILE_LOCATION ="/etc/replicast/";
 	
 	public static final String DEFAULTBUFFER_BUFFERTIME="defaultBuffer.bufferTime";
 	public static final String DEFAULTBUFFER_FETCHGRACEPERIOD="defaultBuffer.fetchGracePeriod";

@@ -1,0 +1,23 @@
+<div class="panel-body">
+	<div class="row">
+		<div class="col-lg-12">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Status</th>
+						<th>Interface Name</th>
+						<th>IP Address</th>
+					</tr>
+				</thead>
+				<tbody>
+    				<tr ng-repeat="interface in interfaces">
+    					<td><input type="button" ng-model="interface.name" value="ON"></td>
+    					<td>{{interface.displayName}}</td>
+    					<td>{{interface.address}}</td>
+    				</tr>
+    			</tbody>
+			</table>
+			<input type="button" value="Apply" ng-click="interfaceApply()"/>
+		</div>
+	</div>
+</div>

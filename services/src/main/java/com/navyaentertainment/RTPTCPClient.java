@@ -19,6 +19,8 @@ import org.glassfish.grizzly.nio.transport.TCPNIOConnection;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 
+import com.navyaentertainment.services.ClientConfigSettings;
+
 
 public class RTPTCPClient  implements CompletionHandler<Connection> {
 	
@@ -162,7 +164,7 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     public void connect() throws Exception {
     	try {
 	       //remote = new InetSocketAddress("192.168.56.1", 7777);
-	       remote = new InetSocketAddress("127.0.0.1", 7777);
+	       remote = new InetSocketAddress(ClientConfigSettings.serverIP, ClientConfigSettings.serverPort);
 	       local = new InetSocketAddress(Interfaces.getInetAddress(netint), 0);
 	    	if (getConnectionState() == CONN_CLOSED) {
 	    		// start the transport

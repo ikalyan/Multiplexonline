@@ -20,14 +20,6 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 		try {
 			prop = getProperties();
 			output = new FileOutputStream(propertyFile);
-			prop.setProperty(RTPSplitterConstant.INPUT_TCP_CHANNEL_KEY, rtpSplitterChannelDomain.getInputTCPChannel());
-			prop.setProperty(RTPSplitterConstant.OUTPUT_TCP_CHANNEL_KEY, rtpSplitterChannelDomain.getOutputTCPChannel());
-			prop.setProperty(RTPSplitterConstant.INPUT_UDP_CHANNEL_KEY, rtpSplitterChannelDomain.getInputUDPChannel());
-			prop.setProperty(RTPSplitterConstant.OUTPUT_UDP_CHANNEL_KEY, rtpSplitterChannelDomain.getOutputUDPChannel());
-			prop.setProperty(RTPSplitterConstant.INPUT_TCP_PORT_KEY, rtpSplitterChannelDomain.getInputTCPChannelPort());
-			prop.setProperty(RTPSplitterConstant.OUTPUT_TCP_PORT_KEY, rtpSplitterChannelDomain.getOutputTCPChannelPort());
-			prop.setProperty(RTPSplitterConstant.INPUT_UDP_PORT_KEY, rtpSplitterChannelDomain.getInputUDPChannelPort());
-			prop.setProperty(RTPSplitterConstant.OUTPUT_UDP_PORT_KEY, rtpSplitterChannelDomain.getOutputUDPChannelPort());
 			
 			prop.setProperty(RTPSplitterConstant.DEFAULTBUFFER_BUFFERTIME, rtpSplitterChannelDomain.getDefaultBuffer_bufferTime());
 			prop.setProperty(RTPSplitterConstant.DEFAULTBUFFER_FETCHGRACEPERIOD, rtpSplitterChannelDomain.getDefaultBuffer_fetchGracePeriod());
@@ -57,14 +49,6 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 		RTPSplitterChannelDomain channel = new RTPSplitterChannelDomain();
 		try {
 			prop = getProperties();
-			channel.setInputTCPChannel(prop.getProperty(RTPSplitterConstant.INPUT_TCP_CHANNEL_KEY));
-			channel.setOutputTCPChannel(prop.getProperty(RTPSplitterConstant.OUTPUT_TCP_CHANNEL_KEY));
-			channel.setInputUDPChannel(prop.getProperty(RTPSplitterConstant.INPUT_UDP_CHANNEL_KEY));
-			channel.setOutputUDPChannel(prop.getProperty(RTPSplitterConstant.OUTPUT_UDP_CHANNEL_KEY));
-			channel.setInputTCPChannelPort(prop.getProperty(RTPSplitterConstant.INPUT_TCP_PORT_KEY));
-			channel.setOutputTCPChannelPort(prop.getProperty(RTPSplitterConstant.OUTPUT_TCP_PORT_KEY));
-			channel.setInputUDPChannelPort(prop.getProperty(RTPSplitterConstant.INPUT_UDP_PORT_KEY));
-			channel.setOutputUDPChannelPort(prop.getProperty(RTPSplitterConstant.OUTPUT_UDP_PORT_KEY));
 			
 			channel.setDefaultBuffer_bufferTime(prop.getProperty(RTPSplitterConstant.DEFAULTBUFFER_BUFFERTIME));
 			channel.setDefaultBuffer_fetchGracePeriod(prop.getProperty(RTPSplitterConstant.DEFAULTBUFFER_FETCHGRACEPERIOD));
@@ -166,5 +150,52 @@ public class RTPSplitterServicesImpl implements RTPSplitterServices {
 	@Override
 	public void setPropertyFile(File file) {
 		this.propertyFile = file;
+	}
+	
+	public boolean updateClientSettings(ClientSettings clientSettings, File file) {
+		propertyFile = file;
+		Properties prop = new Properties();
+		OutputStream output = null;
+
+		try {
+			prop = getProperties();
+			output = new FileOutputStream(propertyFile);
+			prop.setProperty(RTPSplitterConstant.UDPPORT, clientSettings.getUdpPort());
+			prop.setProperty(RTPSplitterConstant.SERVERIP, clientSettings.getServerIP());
+			prop.setProperty(RTPSplitterConstant.SERVERPORT, clientSettings.getServerPort());
+			prop.store(output, null);
+			setClientSettings(clientSettings);;
+		} catch (IOException io) {
+			io.printStackTrace();
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
+	public ClientSettings getClientSettings(File file) {
+		propertyFile = file;
+		Properties prop = new Properties();
+		ClientSettings clientSettings = new ClientSettings();
+		try {
+			prop = getProperties();
+			clientSettings.setServerIP(prop.getProperty(RTPSplitterConstant.SERVERIP));
+			clientSettings.setServerPort(prop.getProperty(RTPSplitterConstant.SERVERPORT));
+			clientSettings.setUdpPort(prop.getProperty(RTPSplitterConstant.UDPPORT));
+		} catch (IOException io) {
+			io.printStackTrace();
+		} 
+		return clientSettings;
+	}
+	
+	public void setClientSettings(ClientSettings clientSettings){
+		ClientConfigSettings.udpPort = clientSettings.getUdpPort();
+		ClientConfigSettings.serverIP = clientSettings.getServerIP();
+		ClientConfigSettings.serverPort = clientSettings.getServerPort() == null ? 7777 : Integer.parseInt(clientSettings.getServerPort());
 	}
 }

@@ -96,4 +96,8 @@ public class UDPServer {
 	public int getPort() {
 		return port;
 	}
+	
+	public void unbound(){
+		socket.disconnect();
+	}
 }

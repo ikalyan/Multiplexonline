@@ -3,11 +3,12 @@ package com.livedevices.web.client.controller;
 import java.io.File;
 import java.io.IOException;
 import java.net.NetworkInterface;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import com.navyaentertainment.ClientApp;
 import com.navyaentertainment.Interfaces;
 import com.navyaentertainment.RTPTCPClient;
 import com.navyaentertainment.services.BufferDomain;
+import com.navyaentertainment.services.ClientSettings;
 import com.navyaentertainment.services.RTPSplitterChannelDomain;
 import com.navyaentertainment.services.RTPSplitterConstant;
 import com.navyaentertainment.services.RTPSplitterServices;
@@ -32,18 +34,25 @@ public class DevicesController {
 
 	protected static Logger logger = Logger.getLogger(DevicesController.class);
 	 
-	private File propertyFile;
-	
 	private List<NetworkInterface> availableNetworkInterface = new ArrayList<NetworkInterface>();
+	ClientApp app = null;
+	private boolean appStatus = false;
 	
 	@PostConstruct
-	public void init() {
-		//URL url = getClass().getResource(RTPSplitterConstant.FILE_NAME);
-		//this.propertyFile = new File(url.getPath());
-		//rtpSplitterServices.setPropertyFile(propertyFile);
-		//Interfaces interfaces = new Interfaces();
-		//availableNetworkInterface = interfaces.getNetworkInterfaces();
+	public void init() throws Exception {
+		String fileName = RTPSplitterConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		File file = new File(fileName);
+		if(file.exists()){
+			ClientSettings clientSettings = rtpSplitterServices.getClientSettings(file);
+			rtpSplitterServices.setClientSettings(clientSettings);
+		}
+		app = new ClientApp();
+		app.run();
+		appStatus = true;
 	}
+	
+	@Autowired
+    private ServletContext servletContext;
 	
 	@Autowired
 	private RTPSplitterServices rtpSplitterServices;
@@ -51,7 +60,8 @@ public class DevicesController {
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
 	public List<AvailableChannels> explore() throws IOException {
-		
+		Interfaces interfaces = new Interfaces();
+		availableNetworkInterface = interfaces.getNetworkInterfaces();
 		List<AvailableChannels> availableChannels = new ArrayList<AvailableChannels>();
 		for (NetworkInterface networkInterface : availableNetworkInterface) {
 			AvailableChannels channel = new AvailableChannels();
@@ -108,19 +118,42 @@ public class DevicesController {
 		return rtpSplitterServices.updateBufferSettings(bufferDomain);
 	}
 	
-	@RequestMapping(value = "/startServer", method = RequestMethod.GET)
+	@RequestMapping(value = "/startApp", method = RequestMethod.GET)
 	@ResponseBody
-	public boolean startServer(@RequestParam("state") String state) throws Exception {
+	public boolean startApp(@RequestParam("state") String state) throws Exception {
 		
 		if(state =="Stop"){
-			//ClientApp app =new ClientApp();
-			//app.stop();
+			app.stop();
+			appStatus = false;
 		}else{
-			//RTPSplitterChannelDomain channelDomain = rtpSplitterServices.getRTPSChannel();
-			ClientApp app =new ClientApp();
-			app.start();
+			app.run();
+			appStatus = true;
 		}
+		return appStatus;
+	}
+	@RequestMapping(value = "/getAppStatus", method = RequestMethod.GET)
+	@ResponseBody
+	public boolean getAppStatus() throws Exception {
+		return appStatus;
+	}
+	@RequestMapping(value = "/clientSettings", method = RequestMethod.POST)
+	@ResponseBody
+	public boolean setIpSettings(@RequestBody ClientSettings clientSettings) throws Exception {
+		String fileName = RTPSplitterConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		File file = new File(fileName);
+		if(!file.exists()){
+			file.createNewFile();
+		}
+		rtpSplitterServices.updateClientSettings(clientSettings, file);
+		app.stop();
+		app.run();
 		return true;
 	}
-	
+	@RequestMapping(value = "/clientSettings", method = RequestMethod.GET)
+	@ResponseBody
+	public ClientSettings getClientSettings() throws Exception {
+		String fileName = RTPSplitterConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		File file = new File(fileName);
+		return rtpSplitterServices.getClientSettings(file);
+	}
 }

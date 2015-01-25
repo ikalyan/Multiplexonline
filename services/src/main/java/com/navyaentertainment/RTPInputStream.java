@@ -43,4 +43,9 @@ public class RTPInputStream {
 	public void setLogEveryPacket(boolean logEveryPacket) {
 		this.logEveryPacket = logEveryPacket;
 	}
+	
+	public void unbound(){
+		server.unbound();
+	}
+	
 }
