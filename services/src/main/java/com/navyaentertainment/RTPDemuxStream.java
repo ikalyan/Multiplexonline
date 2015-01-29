@@ -55,7 +55,7 @@ public class RTPDemuxStream {
     				try {
     					server.writePacket(packet, ipAddress, 6000);
     					count++;
-    					if (count % 1 == 0) System.out.println("Sending packet #" + count + ", " + ipAddress.toString() + " SEQ : " + packet.getSequenceNumber());
+    					if (count % 1000 == 0) System.out.println("Sending packet #" + count + ", " + ipAddress.toString() + " SEQ : " + packet.getSequenceNumber());
     					packet = null;
     					success = true;
     				} catch (Exception e) {

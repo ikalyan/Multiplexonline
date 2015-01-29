@@ -14,13 +14,7 @@ public class RTPTCPMissingPackets extends TCPCommPacket {
 		super();
 		this.type = TYPE_MISSING_PACKETS;
 	}
-	
-	public RTPTCPMissingPackets(int packetid) {
-		this();
-		this.packetid = packetid;
-		
-	}
-	
+
 	public void setMissingPackets(ArrayList<Integer> packets) {
 		this.seqNumbers = packets;
 		noOfMissingPackets = packets.size();

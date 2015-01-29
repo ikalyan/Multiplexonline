@@ -15,9 +15,9 @@ public class RTPDatagramPacket {
 	public void initWithTCPPacket(RTPTCPPacket tcpPacket) {
 		System.arraycopy(tcpPacket.message, 0, buf, 0, tcpPacket.messageSize);
 		dp.setLength(tcpPacket.messageSize);
-		recieveTime = new Date().getTime();
+		recieveTime = tcpPacket.recieveTime;
 		this.missingSequence = tcpPacket.getTimeSequence();
-		System.out.println("Init TCPPacket : " + getSequenceNumber() + " : " + missingSequence);
+		//System.out.println("Init TCPPacket : " + getSequenceNumber() + " : " + missingSequence);
 	}
 	
 	public byte[] getBuffer() {

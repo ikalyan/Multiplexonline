@@ -44,7 +44,7 @@ public class RTPTCPDemuxStream {
 	    					if ((count % 100000) != 0 || (packet.getMissingSequence() != -1 && (missingSequence - packet.getMissingSequence()) > 10))  {
 	    						if((packet.getMissingSequence() != -1) &&(missingSequence - packet.getMissingSequence()) > 10) {
 	    							packet.setMissingSequence(-1);
-	    							System.out.println("Missing SEQ GREATER THAN 10 " + missingSequence + " : " + packet.getMissingSequence());
+	    							//System.out.println("Missing SEQ GREATER THAN 10 " + missingSequence + " : " + packet.getMissingSequence());
 	    						}
 	    						packet.resetSendTime();
 	    						client.writePacket(packet);
@@ -55,7 +55,7 @@ public class RTPTCPDemuxStream {
 	    						System.out.println("Ignoring packet " + packet.getSequenceNumber() + " : " + packet.getMissingSequence());
 	    					}
 	    					count++;
-	    					if (count %1 == 0) System.out.println("TCP: Sending packet #" + count + ", " + client.getLocalAddress() + " SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
+	    					if (count %1000 == 0) System.out.println("TCP: Sending packet #" + count + ", " + client.getLocalAddress() + " SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
 	    					packet = null;
     					} else {
     						if (client == null) {

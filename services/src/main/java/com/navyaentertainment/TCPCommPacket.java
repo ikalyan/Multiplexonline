@@ -1,7 +1,6 @@
 package com.navyaentertainment;
 
 import java.util.Date;
-
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.memory.ByteBufferManager;
 import org.glassfish.grizzly.memory.ByteBufferWrapper;
@@ -12,22 +11,25 @@ public class TCPCommPacket {
 	final static int TYPE_PING = 2;
 	final static int TYPE_RTP = 3;
 	final static int TYPE_MISSING_PACKETS = 4;
-	final static int TYPE_CONN_STATS = 5;
+	final static int TYPE_RATE_CONTROL = 5;
 	final static int TYPE_STATS = 6;
-
-	int packetid;
+	
 	int messageSize;
-	int timeSeq;
+	int timeSeq = 0;
 	int type;
 	byte[] message = new byte[1500];
 	long sendTime = 0;
 	long recieveTime = 0;
+	
+	final static int HEADER_SIZE = Integer.BYTES + Integer.BYTES + Integer.BYTES + Long.BYTES;
 
-	public TCPCommPacket(byte[] message, int messageSize, int timeSeq, int type) {
+
+	public TCPCommPacket(byte[] message, int messageSize, int timeSeq, int type, long sendTime) {
 		this.message = message;
 		this.messageSize = messageSize;
 		this.timeSeq = timeSeq;
 		this.type = type;
+		this.sendTime = sendTime;
 	}
 	
 	public TCPCommPacket() {
@@ -39,14 +41,14 @@ public class TCPCommPacket {
 //		message = new byte[sourceBufferLength];
 
 	    // If source buffer doesn't contain length
-	    if (sourceBufferLength < 16) {
+	    if (sourceBufferLength < HEADER_SIZE) {
 	        return 0;
 	    }
 
 	    // Get the body length
 	    messageSize = sourceBuffer.getInt();
 	    // The complete message length
-	    final int completeMessageLength = 16 + messageSize;
+	    final int completeMessageLength = HEADER_SIZE + messageSize;
 
 	    readHeader(sourceBuffer);
 	    // If the source message doesn't contain entire body
@@ -66,14 +68,14 @@ public class TCPCommPacket {
 //		message = new byte[sourceBufferLength];
 
 	    // If source buffer doesn't contain length
-	    if (sourceBufferLength < 16) {
+	    if (sourceBufferLength < HEADER_SIZE) {
 	        return 0;
 	    }
 
 	    // Get the body length
 	    messageSize = sourceBuffer.getInt();
 	    // The complete message length
-	    final int completeMessageLength = 16 + messageSize;
+	    final int completeMessageLength = HEADER_SIZE + messageSize;
 
 	    // If the source message doesn't contain entire body
 	    if (sourceBufferLength < completeMessageLength) {
@@ -89,9 +91,10 @@ public class TCPCommPacket {
 	
 	public void readHeader(Buffer sourceBuffer) {
 		// MessageSize is already read
-	    this.packetid = sourceBuffer.getInt();
+	    // this.packetid = sourceBuffer.getInt();
 	    this.timeSeq = sourceBuffer.getInt();
 	    this.type = sourceBuffer.getInt();
+	    this.sendTime = sourceBuffer.getLong();
 	}
 	
 	public void readMessage(Buffer sourceBuffer) {
@@ -115,10 +118,14 @@ public class TCPCommPacket {
 	
 	public void writeHeader(Buffer bb) {
 		bb.putInt(this.messageSize);
-    	bb.putInt(this.packetid);
-    	timeSeq = (int)(new Date().getTime() - RTPTCPClient.referenceTime)/1000;
+    	//bb.putInt(this.packetid);
+    	if (timeSeq == 0) timeSeq = (int)(new Date().getTime() - RTPTCPClient.referenceTime)/1000;
     	bb.putInt(timeSeq);
     	bb.putInt(type);
+    	if (sendTime == 0) {
+    		sendTime = new Date().getTime();
+    	}
+		bb.putLong(sendTime);
 	}
 	
 	public int getTimeSequence() {

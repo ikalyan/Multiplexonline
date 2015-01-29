@@ -65,7 +65,7 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 			RTPTCPClient client = connectedClients.get(0);
 			long startTime = new Date().getTime();
 			for (int i=0; i<1000 && ((new Date().getTime() - startTime) < 5000);) {
-				TCPPingRequest request = new TCPPingRequest(i);
+				TCPPingRequest request = new TCPPingRequest();
 				try {
 					if (client.sendPingRequest(request)) i++; 
 				} catch (Exception e) {
@@ -172,7 +172,7 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 		}
 		try {
 			if (cli != null) {
-				TCPPingRequest packet = new TCPPingRequest(count);
+				TCPPingRequest packet = new TCPPingRequest();
 				if (cli.sendPingRequest(packet)) result++;
 				//result++;
 			}
@@ -187,32 +187,10 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 		return result;
 	}
 	
-	private int sendPingRequestsCheckCanWrite() {
-		int i=0;
-		for (RTPTCPClient client : connectedClients) {
-			try {
-					if (client.canSendPing()) {
-						TCPPingRequest packet = new TCPPingRequest();
-						client.sendPingRequest(packet);
-						i++;
-					}
-			} catch (Exception e) {
-				connectedClients.remove(client);
-				retryClients.add(client);
-			}
-			try {
-//				Thread.sleep(1);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return i;
-	}
-	
 	public void registerPingResponse(Connection<TCPNIOConnection> connection, TCPPingRequest request) {
 		RTPTCPClient client = connectionMap.get(connection);
 		client.insertPingRequest(request);
-		if (client.getPingRequestSize() > 0 && client.getPingRequestSize()%500 == 0)System.out.printf("PING COUNT: ARTT : CRTT : AREC : CREC : ARES : CRES : ADDRESS  :: %5d : %4d : %4d : %4d : %4d : %4d : %4d : %4d : %s\n", 
+		if (client.getPingRequestSize() > 0 && client.getPingRequestSize()%(RTPTCPClient.maxPings/2) == 0)System.out.printf("PING COUNT: ARTT : CRTT : AREC : CREC : ARES : CRES : ADDRESS  :: %5d : %4d : %4d : %4d : %4d : %4d : %4d : %4d : %s\n", 
 												client.getPingRequestSize(), 
 												client.getAveragePingRTT(),
 												request.getRoundtripTimeClient(),
@@ -222,6 +200,11 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 												request.getResponseTime(), 
 												client.getTotalReceivWindow(),
 												connection.getLocalAddress());
+	}
+	
+	public void registerRateControl(Connection<TCPNIOConnection> connection, TCPRateControl packet) {
+		RTPTCPClient client  = connectionMap.get(connection);
+		client.registerRateControlInKbps(packet);
 	}
 
 	@Override

@@ -13,8 +13,6 @@ import org.glassfish.grizzly.CompletionHandler;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.TransportFilter;
-import org.glassfish.grizzly.memory.ByteBufferManager;
-import org.glassfish.grizzly.memory.ByteBufferWrapper;
 import org.glassfish.grizzly.nio.transport.TCPNIOConnection;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
@@ -64,11 +62,13 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
 	
 	private int timeDiff = -65000;
 	
-	private int maxPings = 	1000;
+	static final public int maxPings = 	10000;
 	
 	private ArrayList<TCPPingRequest> pingRequests = new ArrayList<TCPPingRequest>();
 	private int pendingRequests = 0;
 	private int pingRequestCount = 0;
+	
+	private short rateControlInKbps = 1000;
 	
 	private void clearStatistics() {
 		averageRoundTrip = 0;
@@ -196,39 +196,36 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     }
     
     public void writePacket(RTPDatagramPacket packet) throws Exception {
-    	byte[] bytes = new byte[packet.getLength() + 16];
- 
-    	ByteBufferManager manager = new  ByteBufferManager();
-    	ByteBufferWrapper bb = manager.allocate(1500);
-//    	ByteBuffer bb = ByteBuffer.wrap(bytes);
-    	int seq = packet.getSequenceNumber();
+    	
     	int timeSeq = (int)(new Date().getTime() - referenceTime)/1000;
-
     	if (packet.getMissingSequence() == -1) packet.setMissingSequence(timeSeq);
     	else timeSeq = (int)packet.getMissingSequence();
     	
-    	bb.putInt(packet.getLength());
-    	bb.putInt(seq);
-    	bb.putInt(timeSeq);
-    	bb.putInt(TCPCommPacket.TYPE_RTP);
-    	bb.put(packet.getBuffer(), 0, packet.getLength());
-
-    	bb.trim();
-    	connection.write(bb);
 		packet.setSendTime();
+    	TCPCommPacket tcpPacket = new TCPCommPacket(packet.getBuffer(), packet.getLength(), timeSeq, TCPCommPacket.TYPE_RTP, packet.getSendTime());
+
+    	connection.write(tcpPacket.writePacket());
 	}
     
+
+    
+    private long currentIntervalBytes = 0;
+    private long currentInterval = 0;
+    private long lastUnsuccesfulWriteTime = 0;
+    private long lastSuccesssfulWriteTime = 0;
+    private long packetsPerMilliSecond = 0;
     public void writePacket(TCPCommPacket packet) throws Exception {
     	lastWriteTime = new Date().getTime();
     	connection.write(packet.writePacket());
 		packet.setSendTime(lastWriteTime);
-		//System.out.println("WRITE " + localAddress + " " + (new Date().getTime() - time));
+		currentIntervalBytes += packet.messageSize;
+		//System.out.println("Current Interval Bytes : " + currentIntervalBytes + " " + lastWriteTime);
 	}
     
     public void sendPingRequests() throws Exception {
     	connectionState.set(CONN_PING_INITIATED);
     	for (int i=0; i< maxPings;) {
-    		TCPPingRequest packet = new TCPPingRequest(i);
+    		TCPPingRequest packet = new TCPPingRequest();
     		
     		if (sendPingRequest(packet))  {
     			i++;
@@ -237,7 +234,7 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     }
     
     public boolean sendPingRequest(TCPPingRequest request) throws Exception {    	
-    	if (canSendPing()) {
+    	if (canSendPing(request)) {
 	    	writePacket(request);
 	    	pendingRequests++;
 	    	pingRequestCount++;
@@ -245,11 +242,11 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     	} else return false;
     }
     
-    public boolean canSendPing() {
+    public boolean canSendPing(TCPPingRequest request) {
     	long timeSinceLastPacket = new Date().getTime() - lastWriteTime;
     	if ((getConnectionState() == CONN_ESTABLISHED || getConnectionState() == CONN_PING_INITIATED)
-    			&& canWrite() 
-    			&& (timeSinceLastPacket >= averageTBPServer/2 && timeSinceLastPacket >= 2)
+    			&& canWrite(request) 
+    			//&& (timeSinceLastPacket >= averageTBPServer/2 && timeSinceLastPacket >= 2)
     			&& pingRequestCount < maxPings)
     		return true;
  
@@ -264,9 +261,49 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     	return localAddress;
     }
     
+    
     public boolean canWrite() {
     	if (connection != null) 
     		return connection.canWrite();
+    	return false;
+    }
+    
+    public boolean canWrite(TCPCommPacket packet) {
+    	if (canWrite()) {
+    		long currentTime = new Date().getTime();
+    		long timeInterval = currentTime/1000;
+    		if (lastUnsuccesfulWriteTime == currentTime) return false;
+    		if (lastSuccesssfulWriteTime == currentTime && packetsPerMilliSecond >= 2) {
+    			lastUnsuccesfulWriteTime = currentTime;
+    			return false;
+    		}
+    		if (lastSuccesssfulWriteTime != currentTime) packetsPerMilliSecond = 0;
+    		//System.out.println(" TI : CTI " + timeInterval + " : " + currentInterval);
+    		if (timeInterval != currentInterval) {
+    			currentIntervalBytes = 0;
+    			currentInterval = timeInterval;
+    			lastSuccesssfulWriteTime = currentTime;
+    			packetsPerMilliSecond++;
+    			return true;
+    		} else {
+    			if (rateControlInKbps == 0) {
+        			lastSuccesssfulWriteTime = currentTime;
+        			packetsPerMilliSecond++;
+    				return true;
+    			}
+//    			System.out.println("RTC:TI:CIB:CWB : " + rateControlInKbps + " : " + (currentTime%1000 + 1) + " : " + currentIntervalBytes + " :" + rateControlInKbps*(currentTime%1000 + 1)/8);
+    			if (rateControlInKbps*((currentTime%1000 + 1)/8) > (currentIntervalBytes+packet.messageSize)) {
+        			lastSuccesssfulWriteTime = currentTime;
+        			packetsPerMilliSecond++;
+    				return true;
+    			} else {
+//    				System.out.println("RTC:TI:CIB:CWB : " + rateControlInKbps + " : " + (currentTime%1000 + 1) + " : " + currentIntervalBytes + " :" + rateControlInKbps*(currentTime%1000 + 1)/8);
+//    				System.out.println("*************************************************************Cannot Write ");
+    	        	lastUnsuccesfulWriteTime = currentTime;
+    				return false;
+    			}
+    		}	
+    	}
     	return false;
     }
     
@@ -347,8 +384,8 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
 //    	} else {
         	pingRequests.add(request);
         	pendingRequests--;
-        	if (pingRequests.size() >= 500 && pingRequests.size() % 500 == 0) {
-        		calculateClientThruput(pingRequests.size()-500);
+        	if (pingRequests.size() >= (maxPings/2) && pingRequests.size() % (maxPings/2) == 0) {
+        		calculateClientThruput(pingRequests.size()-(maxPings/2));
         	}
         	if (pingRequests.size() == pingRequestCount && pingRequestCount == maxPings) {
         		connectionState.set(CONN_READY);
@@ -364,6 +401,10 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     
     public void getPingSummary() {
     	
+    }
+    
+    public void registerRateControlInKbps(TCPRateControl packet) {
+    	this.rateControlInKbps = (short)(packet.getTargetRateInKbps()*1.1);
     }
     
     private void calculateClientThruput(int window) {

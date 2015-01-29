@@ -6,12 +6,12 @@ public class RTPTCPServerConnectionInfo {
 	public String clientAddress;
 	public long packetCount;
 	public long totalBytesRecieved;
-	public short byesPerSecond;
+	public long byesPerSecond;
 	public short averageRecieveTimeBetweenPackets;
 	public short avarageSendTimeBetweenPackets;
 	
 	public short pingRequestCount;
-	public short pingPacketsPerSecond;
+	public long pingPacketsPerSecond;
 	public short averageReceieveTimeBetweenPings;
 	public short averageSendTimeBetweenPings;
 

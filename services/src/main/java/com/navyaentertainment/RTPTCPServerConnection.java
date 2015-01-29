@@ -14,35 +14,103 @@ public class RTPTCPServerConnection {
 	private short pingRequests = 0;
 	public long packetCount;
 	public long totalBytesRecieved;
-	public short byesPerSecond;
+	public long byesPerSecond;
 	public short averageRecieveTimeBetweenPackets;
 	public short avarageSendTimeBetweenPackets;
 	
 	private long lastPacketInterval = 0;
 	private short lastIntervalPackets = 0;
-	private short lastIntervalBytes = 0;
+	private long lastIntervalBytes = 0;
 	
 	private long currentPacketInterval = 0;
 	private short currentIntervalPackets = 0;
-	private short currentIntervalBytes = 0;
+	private long currentIntervalBytes = 0;
+	
+	private long lastSendTime = 0;
+	private long lastReceieveTime = 0;
+	
+	private long sendKbps = 0;
+	private long recKbps = 0;
+	private long sendTimeWindow = 0;
+	private long recieveTimeWindow = 0;
+	
+	private long recentRateControl = 0;
 	
 	public RTPTCPServerConnection(Connection<TCPNIOConnection> connection) {
 		this.connection = connection;
 	}
 
-	public void registerPacket(TCPCommPacket packet) {
+	/**
+	 * @param packet
+	 * @return rateControl information to be sent back to the client.
+	 */
+	public long registerPacket(TCPCommPacket packet) {
+		long result = 0;
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long timeInterval = packet.sendTime/1000;
 		synchronized (lock) {
-			long timeInterval = packet.recieveTime/1000;
+			if (currentPacketInterval == 0) {
+				currentPacketInterval = timeInterval;
+				lastSendTime = packet.sendTime;
+				lastReceieveTime = packet.recieveTime;
+			}
 			if (timeInterval != currentPacketInterval) {
 				lastPacketInterval = currentPacketInterval;
 				lastIntervalBytes = currentIntervalBytes;
 				lastIntervalPackets = currentIntervalPackets;
+				
+				sendTimeWindow = (packet.sendTime - lastSendTime);
+				recieveTimeWindow = (packet.recieveTime - lastReceieveTime);
+				lastSendTime = packet.sendTime;
+				lastReceieveTime = packet.recieveTime;
+				System.out.println("RecentRate Control : Send Time Window : Recieve Time Window " + recentRateControl + ":"  + sendTimeWindow + ":" + recieveTimeWindow);
+				if (sendTimeWindow > 0 && recieveTimeWindow > 0) {
+					recKbps = (lastIntervalBytes*8/recieveTimeWindow);
+					sendKbps = ((lastIntervalBytes*8)/(sendTimeWindow));
+					if (recentRateControl == 0) {
+						recentRateControl = recKbps;
+						result = recentRateControl;
+					}
+				}
+				
+				if (recKbps > 1.05*recentRateControl) {
+					result = recKbps;
+				} 
+
+				long ratediff = (sendKbps - recKbps);
+				long ratediffperc = 0;
+				if (ratediff > 0) {
+					if (recKbps > 0) ratediffperc = (ratediff*100)/recKbps;
+					if (ratediffperc >= 10 && sendKbps > recentRateControl*1.1) result = recKbps;
+				}
+				
+
+//
+//				long ratediffperc = 0;
+//				long ratediff = (sendKbps - recKbps);
+//
+//				if (recKbps > 0) ratediffperc = (ratediff*100)/recKbps;
+//				if (ratediffperc >= 0) {
+//					result = new Double(recKbps * 1.05).longValue();
+//				}
+				
+				
+				System.out.println("====== BITRATES REC:SEND:RATE DIFF :" + recKbps + " : " + sendKbps + " : " + ratediffperc);
+
 				currentPacketInterval = timeInterval;
 				currentIntervalPackets = 0;
 				currentIntervalBytes = 0;
 			}
 			if (TCPCommPacket.TYPE_PING == packet.type) {
 				pingRequests++;
+				totalBytesRecieved+= packet.messageSize;
+				currentIntervalBytes+= packet.messageSize;
+				currentIntervalPackets++;
 			} else if (TCPCommPacket.TYPE_RTP == packet.type) {
 				packetCount++;
 				totalBytesRecieved+= packet.messageSize;
@@ -50,6 +118,8 @@ public class RTPTCPServerConnection {
 				currentIntervalPackets++;
 			}
 		}
+		if (result != 0) recentRateControl = result;
+		return result;
 		
 	}
 	
@@ -57,8 +127,11 @@ public class RTPTCPServerConnection {
 		RTPTCPServerConnectionInfo info = new RTPTCPServerConnectionInfo();
 		synchronized (lock) {
 			info.byesPerSecond = lastIntervalBytes;
-			info.packetCount = packetCount;
+			info.packetCount = lastIntervalPackets;
 			info.totalBytesRecieved = totalBytesRecieved;
+			info.pingPacketsPerSecond =  lastIntervalPackets;
+			info.pingRequestCount = pingRequests;
+			System.out.println("===== last interval bytes =====  " + lastIntervalBytes);
 		}
 		return info;
 	}

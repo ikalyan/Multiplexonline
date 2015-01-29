@@ -21,12 +21,6 @@ public class TCPPingRequest extends TCPCommPacket {
 		this.type = TYPE_PING;
 	}
 	
-	public TCPPingRequest(int packetid) {
-		this();
-		this.packetid = packetid;
-		
-	}
-	
 	/*
 	 * Returns the message length that is consumed.
 	 */
@@ -86,11 +80,7 @@ public class TCPPingRequest extends TCPCommPacket {
 	public void writeHeader(Buffer bb) {
 		if (responseTime==0 || (respRecTime != 0 && timeRequestTime == 0)) messageSize = Long.BYTES*5 + 1300;
 		else messageSize = Long.BYTES*5; 
-		bb.putInt(this.messageSize);
-    	bb.putInt(this.packetid);
-    	timeSeq = (int)(time - RTPTCPClient.referenceTime)/1000;
-    	bb.putInt(timeSeq);
-    	bb.putInt(this.type);
+		super.writeHeader(bb);
 	}
 	
 	public int getRoundtripTimeClient() {

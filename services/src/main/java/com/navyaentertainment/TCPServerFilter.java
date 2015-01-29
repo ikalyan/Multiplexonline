@@ -42,8 +42,17 @@ public class TCPServerFilter extends BaseFilter {
 	        	        sourceBuffer.split(size) : null;
     	        ctx.setMessage(packet);
 				sourceBuffer.tryDispose();
-				serverConnection.registerPacket(packet);
-				System.out.println(serverConnection.getRTPTCPServerConnectionInfo().toString());
+				long ratecontrol = serverConnection.registerPacket(packet);
+				if (ratecontrol > 0) {
+					TCPRateControl rpacket = new TCPRateControl((short)ratecontrol);
+					if (ctx.getConnection().canWrite()) {
+						ctx.getConnection().write(rpacket.writePacket());
+						System.out.println(" Server sending rate control packet");
+					} else {
+						System.out.println(" UNABLE TO SEND RATE CONTOL PACKET **** PANIC *****");
+					}
+				}
+				//System.out.println(serverConnection.getRTPTCPServerConnectionInfo().toString());
     	        count++;
     	        try {
 					if (packet.type == packet.TYPE_RTP) {

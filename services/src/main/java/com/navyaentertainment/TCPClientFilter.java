@@ -32,6 +32,8 @@ public class TCPClientFilter extends BaseFilter {
 	        	packet = new TCPPingRequest();
 	        } else if (type == TCPCommPacket.TYPE_MISSING_PACKETS) {
 	        	packet = new RTPTCPMissingPackets();
+	        } else if (type == TCPCommPacket.TYPE_RATE_CONTROL) {
+	        	packet = new TCPRateControl((short)0);
 	        }
 	        
 	        if ((size = packet.readPacket(sourceBuffer)) != 0) {
@@ -50,6 +52,9 @@ public class TCPClientFilter extends BaseFilter {
     	        } else if (type == RTPTCPPacket.TYPE_MISSING_PACKETS) {
     	        	System.out.println("Client Recieved Missing packets " + ((RTPTCPMissingPackets)packet).seqNumbers);
     	        	TCPClientManager.getInstance().setClientMissingPackets(((RTPTCPMissingPackets)packet).seqNumbers);
+    	        } else if (type == TCPCommPacket.TYPE_RATE_CONTROL) {
+    	        	System.out.println(" ============ CLIENT RECIEVED RATE CONTROL IN KBPS " + ((TCPRateControl)packet).getTargetRateInKbps());
+    	        	TCPClientManager.getInstance().registerRateControl(ctx.getConnection(), (TCPRateControl)packet);
     	        }
 				
     	        return ctx.getInvokeAction(remainder);
