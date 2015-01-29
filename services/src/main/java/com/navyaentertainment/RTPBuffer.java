@@ -14,7 +14,7 @@ public class RTPBuffer {
 	
 	private int missingWindowStart = 2;//1000;
 	private int missingWindowPeriods = 1;
-	private long missingSequence = 0;
+	private long lastInsertMissingSequence = 0;
 	private int missingSequenceNo = 0;
 	boolean serverProcessMissingPackets = false;
 	private long insertTime = 0;
@@ -52,8 +52,9 @@ public class RTPBuffer {
 		if (insertSequence == -1) {
 			insertSequence = packet.getSequenceNumber();
 			fetchSequence = insertSequence;
+			lastMissingSequenceProcessed = packet.getMissingSequence();
 		}
-		if (insertTime != 0 && insertTime < (recieveTime - bufferTime)) {
+		if (insertTime != 0 && insertTime < (recieveTime - bufferTime) && (packet.getMissingSequence() > lastMissingSequenceProcessed)) {
 			// There was no insert for a long time
 			System.out.println("There is not insert for long time resetting buffer" + (recieveTime - insertTime));
 			resetBuffer();
@@ -73,9 +74,13 @@ public class RTPBuffer {
 			Integer mapSeqNumber = msMap.get(currSequence);
 			if (mapSeqNumber == null)  {
 				msMap.put(currSequence, packet.getSequenceNumber());
+
+				//System.out.println("Missing Sequence Map : " +  msMap);
 			} else {
 				if (packet.getSequenceNumber() < mapSeqNumber && ((packet.getSequenceNumber() + 1000)%65536) > packet.getSequenceNumber()) {
 					msMap.put(currSequence, packet.getSequenceNumber());
+
+					//System.out.println("Missing Sequence Map : " +  msMap);
 				}
 			}
 			// Completed Map update
@@ -97,7 +102,7 @@ public class RTPBuffer {
 			for (int i=0; i<serverMissingPackets.size(); i++) {
 				long seq = packets[serverMissingPackets.get(i).intValue()].getMissingSequence();
 				if (priorSequence != seq) {
-					System.out.println("Missing Packet SEQ: " + seq);
+					System.out.println(" Server Missing Packet SEQ: " + seq);
 					priorSequence = seq;
 				}
 			}
@@ -119,7 +124,7 @@ public class RTPBuffer {
 			}
 			seqNum = (seqNum + 1) % 65536;
 		}
-		if(serverMissingPackets.size() > 0) System.out.println("Missing packets: " + serverMissingPackets.size());
+		if(serverMissingPackets.size() > 0) System.out.println("Server Missing packets Size: " + serverMissingPackets.size());
 	}
 	
 	private void updateInsertSequence(int currSequence) {
@@ -193,10 +198,11 @@ public class RTPBuffer {
 		insertSequence = -1;
 		insertTime = 0;
 		fetchTime = 0;
-		missingSequence = 0;
+		lastInsertMissingSequence = 0;
 		missingSequenceNo = 0;
 		msMap.clear();
 		serverMissingPackets.clear();
+		clientMissingPackets.clear();
 		resetCount++;
 	}
 	
