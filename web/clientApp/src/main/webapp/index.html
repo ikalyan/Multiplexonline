@@ -39,7 +39,7 @@
 				controller:'channelController',
 				templateUrl:'channels.html'
 			})
-			.when('/bufferSettings',{
+			.when('/clientBufferSettings',{
 				controller:'bufferController',
 				templateUrl:'bufferSettings.html'
 				});
@@ -154,28 +154,20 @@
 	   
 	   deviceApp.controller('bufferController',function($scope, apiService){
 			apiService.request({
-				 apiMethod: "services/rtpSplitter/bufferSettings",
+				 apiMethod: "services/deMuxClient/bufferSettings",
 				 httpMethod:"GET"
 			}).success(function(response) {
-					$scope.buffer = response;
+				$scope.bufferTime = response.bufferTime;
+				$scope.gracePeriod = response.gracePeriod;
 			});
 			$scope.updateBufferSettings = function(){
 			var data = { 
-					fetchSequence:$scope.buffer.fetchSequence,
-					insertSequence:$scope.buffer.insertSequence,
-					resetCount:$scope.buffer.resetCount,
-					missingWindowStart:$scope.buffer.missingWindowStart,
-					missingWindowPeriods:$scope.buffer.missingWindowPeriods,
-					missingSequence:$scope.buffer.missingSequence,
-					missingSequenceNo:$scope.buffer.missingSequenceNo,
-					insertTime:$scope.buffer.insertTime,
-					fetchTime:$scope.buffer.fetchTime,
-					lastMissingSequenceProcessed:$scope.buffer.lastMissingSequenceProcessed,
-					missingSeqThreshold:$scope.buffer.missingSeqThreshold
-                    };
+					bufferTime : $scope.bufferTime,
+					gracePeriod : $scope.gracePeriod
+                };
 				apiService.request({
                     httpMethod: "POST",
-                    apiMethod:"services/rtpSplitter/bufferSettings",
+                    apiMethod:"services/deMuxClient/bufferSettings",
                     params:data
 				}).success(function(response) {
 					console.log(response);
@@ -224,9 +216,7 @@
 	                    <ul class="nav" id="side-menu">
 	                        <li><a href="#clientSettings">IP Settings</a></li>
 	                         <li><a href="#interfaceSettings">Interface Settings</a></li>
-							 <!-- <li><a href="#channels">Channels</a></li>
-							 
-							 <li><a href="#bufferSettings">Buffer Settings</a></li>-->
+	                         <li><a href="#clientBufferSettings">Buffer Settings</a></li>
 	                    </ul>
 	                </div>
 	                <!-- /.sidebar-collapse -->

@@ -6,6 +6,8 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import com.navyaentertainment.services.ServerConfigSettings;
+
 /**
  * Hello world!
  *
@@ -14,7 +16,7 @@ public class ServerApp {
 	
 	protected static Logger logger = Logger.getLogger(ServerApp.class);
 	private static RTPBuffer buffer = new RTPBuffer(250, 1000, false);
-	private static RTPBuffer muxBuffer = new RTPBuffer(5000, 250, true);
+	private static RTPBuffer muxBuffer = new RTPBuffer(ServerConfigSettings.bufferTime, ServerConfigSettings.gracePeriod, true);
 	private Thread[] appThreads;
 	RTPOutputStream outputStream = null;
 	RTPTCPInputStream inputStream = null;

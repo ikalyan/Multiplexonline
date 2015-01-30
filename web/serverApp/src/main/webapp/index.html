@@ -29,12 +29,15 @@
 	    deviceApp.config(function($routeProvider){
 		$routeProvider.when("/",{
 			controller:'SimpleController',
-			template:'<h1 class="page-header" id="channels_list_id">{{$root.content}}</h1>'
+				template:'<h1 class="page-header" id="channels_list_id">{{$root.content}}</h1>'
 			})
 			.when('/serverConnectionsInfo',{
 				controller:'serverConnectionsInfoController',
 				templateUrl:'serverConnectionInfo.html'
-			});
+			}).when('/serverBufferSettings',{
+				controller:'bufferController',
+				templateUrl:'bufferSettings.html'
+			})
 		});
    
 	   
@@ -114,7 +117,28 @@
 			    }
 			});
 	   });
-
+	   deviceApp.controller('bufferController',function($scope, apiService){
+			apiService.request({
+				 apiMethod: "services/muxServer/bufferSettings",
+				 httpMethod:"GET"
+			}).success(function(response) {
+					$scope.bufferTime = response.bufferTime;
+					$scope.gracePeriod = response.gracePeriod;
+			});
+			$scope.updateBufferSettings = function(){
+			var data = { 
+					bufferTime : $scope.bufferTime,
+					gracePeriod : $scope.gracePeriod
+                };
+				apiService.request({
+                   httpMethod: "POST",
+                   apiMethod:"services/muxServer/bufferSettings",
+                   params:data
+				}).success(function(response) {
+					console.log(response);
+				});
+			}
+	   });
 	   </script>
    </head>
    <body>
@@ -155,6 +179,7 @@
 	                <div class="sidebar-nav navbar-collapse">
 	                    <ul class="nav" id="side-menu">
 							 <li><a href="#serverConnectionsInfo">Server Connection Info</a></li>
+							 <li><a href="#serverBufferSettings">Buffer Settings</a></li>
 	                    </ul>
 	                </div>
 	                <!-- /.sidebar-collapse -->
