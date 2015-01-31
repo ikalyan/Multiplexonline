@@ -21,12 +21,7 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			prop = getProperties();
 			output = new FileOutputStream(propertyFile);
 			
-			prop.setProperty(ClientConfigConstant.DEFAULTBUFFER_BUFFERTIME, rtpSplitterChannelDomain.getDefaultBuffer_bufferTime());
-			prop.setProperty(ClientConfigConstant.DEFAULTBUFFER_FETCHGRACEPERIOD, rtpSplitterChannelDomain.getDefaultBuffer_fetchGracePeriod());
-			prop.setProperty(ClientConfigConstant.DEFAULTBUFFER_PROCESSMISSINGPACKETS, rtpSplitterChannelDomain.getDefaultBuffer_processMissingPackets());
-			prop.setProperty(ClientConfigConstant.MAXBUFFER_BUFFERTIME, rtpSplitterChannelDomain.getMaxBuffer_bufferTime());
-			prop.setProperty(ClientConfigConstant.MAXBUFFER_FETCHGRACEPERIOD, rtpSplitterChannelDomain.getMaxBuffer_fetchGracePeriod());
-			prop.setProperty(ClientConfigConstant.MAXBUFFER_PROCESSMISSINGPACKETS, rtpSplitterChannelDomain.getMaxBuffer_processMissingPackets());
+			
 			prop.store(output, null);
 
 		} catch (IOException io) {
@@ -50,12 +45,6 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 		try {
 			prop = getProperties();
 			
-			channel.setDefaultBuffer_bufferTime(prop.getProperty(ClientConfigConstant.DEFAULTBUFFER_BUFFERTIME));
-			channel.setDefaultBuffer_fetchGracePeriod(prop.getProperty(ClientConfigConstant.DEFAULTBUFFER_FETCHGRACEPERIOD));
-			channel.setDefaultBuffer_processMissingPackets(prop.getProperty(ClientConfigConstant.DEFAULTBUFFER_PROCESSMISSINGPACKETS));
-			channel.setMaxBuffer_bufferTime(prop.getProperty(ClientConfigConstant.MAXBUFFER_BUFFERTIME));
-			channel.setMaxBuffer_fetchGracePeriod(prop.getProperty(ClientConfigConstant.MAXBUFFER_FETCHGRACEPERIOD));
-			channel.setMaxBuffer_processMissingPackets(prop.getProperty(ClientConfigConstant.MAXBUFFER_PROCESSMISSINGPACKETS));
 			
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -78,25 +67,25 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 		return properties;
 	}
 	@Override
-	public boolean updateBufferSettings(BufferDomain bufferDomain) {
+	public boolean updateBufferSettings(BufferDomain bufferDomain,String type) {
 		Properties prop = new Properties();
 		OutputStream output = null;
 
 		try {
 			prop = getProperties();
 			output = new FileOutputStream(propertyFile);
-			prop.setProperty(ClientConfigConstant.FETCHSEQUENCE, bufferDomain.getFetchSequence()+"");
-			prop.setProperty(ClientConfigConstant.INSERTSEQUENCE, bufferDomain.getInsertSequence()+"");
-			prop.setProperty(ClientConfigConstant.RESETCOUNT, bufferDomain.getResetCount()+"");
-			prop.setProperty(ClientConfigConstant.MISSINGWINDOWSTART, bufferDomain.getMissingWindowStart()+"");
-			prop.setProperty(ClientConfigConstant.MISSINGWINDOWPERIODS, bufferDomain.getMissingWindowPeriods()+"");
-			prop.setProperty(ClientConfigConstant.MISSINGSEQUENCE, bufferDomain.getMissingSequence()+"");
-			prop.setProperty(ClientConfigConstant.MISSINGSEQUENCENO, bufferDomain.getMissingSequenceNo()+"");
-			prop.setProperty(ClientConfigConstant.INSERTTIME, bufferDomain.getInsertTime()+"");
+			if(ConfigConstant.CLIENT.equals(type)){
+				prop.setProperty(ConfigConstant.CLIENT_BUFFERTIME, bufferDomain.getBufferTime());
+				prop.setProperty(ConfigConstant.CLIENT_GRACEPERIOD, bufferDomain.getGracePeriod());
+				ClientConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
+				ClientConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+			}else{
+				prop.setProperty(ConfigConstant.SERVER_BUFFERTIME, bufferDomain.getBufferTime());
+				prop.setProperty(ConfigConstant.SERVER_GRACEPERIOD, bufferDomain.getGracePeriod());
+				ServerConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
+				ServerConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+			}
 			
-			prop.setProperty(ClientConfigConstant.FETCHTIME, bufferDomain.getFetchTime()+"");
-			prop.setProperty(ClientConfigConstant.LASTMISSINGSEQUENCEPROCESSED, bufferDomain.getLastMissingSequenceProcessed()+"");
-			prop.setProperty(ClientConfigConstant.MISSINGSEQTHRESHOLD, bufferDomain.getMissingSeqThreshold()+"");
 			prop.store(output, null);
 
 		} catch (IOException io) {
@@ -114,25 +103,24 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 	}
 
 	@Override
-	public BufferDomain getBufferSettings() {
+	public BufferDomain getBufferSettings(String type) {
 		Properties prop = new Properties();
 		InputStream input = null;
-		BufferDomain bufferDomain = new BufferDomain();
+		BufferDomain bufferDomain = new BufferDomain();;
 		try {
 			prop = getProperties();			
-			bufferDomain.setFetchSequence(Integer.parseInt(prop.getProperty(ClientConfigConstant.FETCHSEQUENCE,"-1")));
-			bufferDomain.setInsertSequence(Integer.parseInt(prop.getProperty(ClientConfigConstant.INSERTSEQUENCE,"-1")));
-			bufferDomain.setResetCount(Integer.parseInt(prop.getProperty(ClientConfigConstant.RESETCOUNT,"0")));
-			bufferDomain.setMissingWindowStart(Integer.parseInt(prop.getProperty(ClientConfigConstant.MISSINGWINDOWSTART,"2")));
-			bufferDomain.setMissingWindowPeriods(Integer.parseInt(prop.getProperty(ClientConfigConstant.MISSINGWINDOWPERIODS,"1")));
-			bufferDomain.setMissingSequence(Integer.parseInt(prop.getProperty(ClientConfigConstant.MISSINGSEQUENCE,"0")));
-			bufferDomain.setMissingSequenceNo(Integer.parseInt(prop.getProperty(ClientConfigConstant.MISSINGSEQUENCENO,"0")));
-			bufferDomain.setInsertTime(Integer.parseInt(prop.getProperty(ClientConfigConstant.INSERTTIME,"0")));
-			bufferDomain.setFetchTime(Integer.parseInt(prop.getProperty(ClientConfigConstant.FETCHTIME,"0")));
-			bufferDomain.setLastMissingSequenceProcessed(Integer.parseInt(prop.getProperty(ClientConfigConstant.LASTMISSINGSEQUENCEPROCESSED,"0")));
-			bufferDomain.setMissingSeqThreshold(Integer.parseInt(prop.getProperty(ClientConfigConstant.MISSINGSEQTHRESHOLD,"-1")));
-			
-			
+			if(ConfigConstant.CLIENT.equals(type)){
+				bufferDomain = new BufferDomain();
+				bufferDomain.setBufferTime(prop.getProperty(ConfigConstant.CLIENT_BUFFERTIME,"250"));
+				bufferDomain.setGracePeriod(prop.getProperty(ConfigConstant.CLIENT_GRACEPERIOD,"1000"));
+				ClientConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
+				ClientConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+			}else{
+				bufferDomain.setBufferTime(prop.getProperty(ConfigConstant.SERVER_BUFFERTIME,"5000"));
+				bufferDomain.setGracePeriod(prop.getProperty(ConfigConstant.SERVER_GRACEPERIOD,"250"));
+				ServerConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
+				ServerConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		} finally {
@@ -160,9 +148,9 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 		try {
 			prop = getProperties();
 			output = new FileOutputStream(propertyFile);
-			prop.setProperty(ClientConfigConstant.UDPPORT, clientSettings.getUdpPort());
-			prop.setProperty(ClientConfigConstant.SERVERIP, clientSettings.getServerIP());
-			prop.setProperty(ClientConfigConstant.SERVERPORT, clientSettings.getServerPort());
+			prop.setProperty(ConfigConstant.UDPPORT, clientSettings.getUdpPort());
+			prop.setProperty(ConfigConstant.SERVERIP, clientSettings.getServerIP());
+			prop.setProperty(ConfigConstant.SERVERPORT, clientSettings.getServerPort());
 			prop.store(output, null);
 			setClientSettings(clientSettings);;
 		} catch (IOException io) {
@@ -184,9 +172,9 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 		ClientSettings clientSettings = new ClientSettings();
 		try {
 			prop = getProperties();
-			clientSettings.setServerIP(prop.getProperty(ClientConfigConstant.SERVERIP));
-			clientSettings.setServerPort(prop.getProperty(ClientConfigConstant.SERVERPORT));
-			clientSettings.setUdpPort(prop.getProperty(ClientConfigConstant.UDPPORT));
+			clientSettings.setServerIP(prop.getProperty(ConfigConstant.SERVERIP));
+			clientSettings.setServerPort(prop.getProperty(ConfigConstant.SERVERPORT));
+			clientSettings.setUdpPort(prop.getProperty(ConfigConstant.UDPPORT));
 		} catch (IOException io) {
 			io.printStackTrace();
 		} 

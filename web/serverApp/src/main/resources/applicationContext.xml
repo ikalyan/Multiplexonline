@@ -23,4 +23,6 @@
 	
 	<bean id="muxServerServices" class="com.navyaentertainment.services.MuxServerServicesImpl"/>
 	
+	<bean id="demuxClientServices" class="com.navyaentertainment.services.DemuxClientServicesImpl"/>
+	
 </beans>

@@ -15,7 +15,7 @@ import com.navyaentertainment.services.ClientConfigSettings;
 public class ClientApp {
 
 	protected static Logger logger = Logger.getLogger(ClientApp.class);
-	private static RTPBuffer buffer = new RTPBuffer(250, 1000, false);
+	private static RTPBuffer buffer = new RTPBuffer(ClientConfigSettings.bufferTime, ClientConfigSettings.gracePeriod, false);
 	private Thread[] clientThread;
 	RTPInputStream stream = null;
 	public void run() {

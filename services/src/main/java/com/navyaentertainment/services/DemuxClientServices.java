@@ -11,9 +11,9 @@ public interface DemuxClientServices {
 	
 	RTPSplitterChannelDomain getRTPSChannel();
 	
-	boolean updateBufferSettings(BufferDomain bufferDomain);
+	boolean updateBufferSettings(BufferDomain bufferDomain,String type);
 	
-	BufferDomain getBufferSettings();
+	BufferDomain getBufferSettings(String type);
 	
 	void setPropertyFile(File file);
 	

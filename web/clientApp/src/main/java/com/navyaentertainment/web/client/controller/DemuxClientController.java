@@ -25,7 +25,7 @@ import com.navyaentertainment.RTPTCPClient;
 import com.navyaentertainment.services.BufferDomain;
 import com.navyaentertainment.services.ClientSettings;
 import com.navyaentertainment.services.RTPSplitterChannelDomain;
-import com.navyaentertainment.services.ClientConfigConstant;
+import com.navyaentertainment.services.ConfigConstant;
 import com.navyaentertainment.services.DemuxClientServices;
 
 @Controller
@@ -40,12 +40,14 @@ public class DemuxClientController {
 	
 	@PostConstruct
 	public void init() throws Exception {
-		String fileName = ClientConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		String fileName = ConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
 		File file = new File(fileName);
-		if(file.exists()){
-			ClientSettings clientSettings = demuxClientServices.getClientSettings(file);
-			demuxClientServices.setClientSettings(clientSettings);
+		if(!file.exists()){
+			file.createNewFile();
 		}
+		ClientSettings clientSettings = demuxClientServices.getClientSettings(file);
+		demuxClientServices.setClientSettings(clientSettings);
+
 		app = new ClientApp();
 		app.run();
 		appStatus = true;
@@ -108,14 +110,18 @@ public class DemuxClientController {
 	@RequestMapping(value = "/bufferSettings", method = RequestMethod.GET)
 	@ResponseBody
 	public BufferDomain getBufferSettings() throws IOException {
-		BufferDomain bufferDomain = demuxClientServices.getBufferSettings();
+		BufferDomain bufferDomain = demuxClientServices.getBufferSettings(ConfigConstant.CLIENT);
 		return bufferDomain;
 	}
 	
 	@RequestMapping(value = "/bufferSettings", method = RequestMethod.POST)
 	@ResponseBody
 	public boolean updateBufferSettings(@RequestBody BufferDomain bufferDomain) throws IOException {
-		return demuxClientServices.updateBufferSettings(bufferDomain);
+		demuxClientServices.updateBufferSettings(bufferDomain,ConfigConstant.CLIENT);
+		app.stop();
+		app = new ClientApp();
+		app.run();
+		return true;
 	}
 	
 	@RequestMapping(value = "/startApp", method = RequestMethod.GET)
@@ -139,7 +145,7 @@ public class DemuxClientController {
 	@RequestMapping(value = "/clientSettings", method = RequestMethod.POST)
 	@ResponseBody
 	public boolean setIpSettings(@RequestBody ClientSettings clientSettings) throws Exception {
-		String fileName = ClientConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		String fileName = ConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
 		File file = new File(fileName);
 		if(!file.exists()){
 			file.createNewFile();
@@ -152,7 +158,7 @@ public class DemuxClientController {
 	@RequestMapping(value = "/clientSettings", method = RequestMethod.GET)
 	@ResponseBody
 	public ClientSettings getClientSettings() throws Exception {
-		String fileName = ClientConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
+		String fileName = ConfigConstant.FILE_LOCATION+servletContext.getContextPath()+".properties";
 		File file = new File(fileName);
 		return demuxClientServices.getClientSettings(file);
 	}
