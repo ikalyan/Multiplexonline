@@ -62,13 +62,13 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
 	
 	private int timeDiff = -65000;
 	
-	static final public int maxPings = 	10000;
+	static final public int maxPings = 	10;
 	
 	private ArrayList<TCPPingRequest> pingRequests = new ArrayList<TCPPingRequest>();
 	private int pendingRequests = 0;
 	private int pingRequestCount = 0;
 	
-	private short rateControlInKbps = 1000;
+	private short rateControlInKbps = 100;
 	
 	private void clearStatistics() {
 		averageRoundTrip = 0;
