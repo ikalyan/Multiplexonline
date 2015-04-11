@@ -14,7 +14,7 @@ public class RTPTCPServerConnection {
 	private short pingRequests = 0;
 	public long packetCount;
 	public long totalBytesRecieved;
-	public long byesPerSecond;
+	public long bytesPerSecond;
 	public short averageRecieveTimeBetweenPackets;
 	public short avarageSendTimeBetweenPackets;
 	
@@ -29,12 +29,14 @@ public class RTPTCPServerConnection {
 	private long lastSendTime = 0;
 	private long lastReceieveTime = 0;
 	
-	private long sendKbps = 0;
-	private long recKbps = 0;
+	private short sendKbps = 0;
+	private short recKbps = 0;
 	private long sendTimeWindow = 0;
 	private long recieveTimeWindow = 0;
 	
 	private long recentRateControl = 0;
+	private MaxSizeHashMap<Short, Short> recentRecKbps = new MaxSizeHashMap<Short, Short>(8);
+	private MaxSizeHashMap<Short, Short> recentSendKbps = new MaxSizeHashMap<Short, Short>(8);
 	
 	public RTPTCPServerConnection(Connection<TCPNIOConnection> connection) {
 		this.connection = connection;
@@ -52,7 +54,7 @@ public class RTPTCPServerConnection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		long timeInterval = packet.sendTime/1000;
+		long timeInterval = packet.sendTime/250; // vs 1 second
 		synchronized (lock) {
 			if (currentPacketInterval == 0) {
 				currentPacketInterval = timeInterval;
@@ -70,8 +72,15 @@ public class RTPTCPServerConnection {
 				lastReceieveTime = packet.recieveTime;
 				System.out.println("RecentRate Control : Send Time Window : Recieve Time Window " + recentRateControl + ":"  + sendTimeWindow + ":" + recieveTimeWindow);
 				if (sendTimeWindow > 0 && recieveTimeWindow > 0) {
-					recKbps = (lastIntervalBytes*8/recieveTimeWindow);
-					sendKbps = ((lastIntervalBytes*8)/(sendTimeWindow));
+					
+					recKbps = (short)(lastIntervalBytes*8/recieveTimeWindow);
+					sendKbps = (short)((lastIntervalBytes*8)/(sendTimeWindow));
+					
+					recentRecKbps.put(recKbps, recKbps);
+					recentSendKbps.put(sendKbps, sendKbps);
+					recKbps = getAverageRecKbps();
+					sendKbps = getAverageSendKbps();
+					
 					if (recentRateControl == 0) {
 						recentRateControl = recKbps;
 						result = recentRateControl;
@@ -123,6 +132,22 @@ public class RTPTCPServerConnection {
 		
 	}
 	
+	private short getAverageRecKbps() {
+		short result = 0;
+		for (Short rate : recentRecKbps.values()) {
+			result += rate;
+		}
+		return (short) (result/recentRecKbps.size());
+	}
+	
+	private short getAverageSendKbps() {
+		short result = 0;
+		for (Short rate : recentSendKbps.values()) {
+			result += rate;
+		}
+		return (short) (result/recentRecKbps.size());
+	}
+	
 	public RTPTCPServerConnectionInfo getRTPTCPServerConnectionInfo() {
 		RTPTCPServerConnectionInfo info = new RTPTCPServerConnectionInfo();
 		synchronized (lock) {
@@ -131,7 +156,7 @@ public class RTPTCPServerConnection {
 			info.totalBytesRecieved = totalBytesRecieved;
 			info.pingPacketsPerSecond =  lastIntervalPackets;
 			info.pingRequestCount = pingRequests;
-			System.out.println("===== last interval bytes =====  " + lastIntervalBytes);
+			//System.out.println("===== last interval bytes =====  " + lastIntervalBytes);
 		}
 		return info;
 	}

@@ -12,7 +12,7 @@ public class RTPBuffer {
 	private int bufferTime = 1500; // milli seconds
 	private int fetchGracePeriod = 500; // milli seconds
 	
-	private int missingWindowStart = 2;//1000;
+	private int missingWindowStart = 4;//1000;
 	private int missingWindowPeriods = 1;
 	private long lastInsertMissingSequence = 0;
 	private int missingSequenceNo = 0;

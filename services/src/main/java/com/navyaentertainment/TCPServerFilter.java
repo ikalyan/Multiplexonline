@@ -47,7 +47,7 @@ public class TCPServerFilter extends BaseFilter {
 					TCPRateControl rpacket = new TCPRateControl((short)ratecontrol);
 					if (ctx.getConnection().canWrite()) {
 						ctx.getConnection().write(rpacket.writePacket());
-						System.out.println(" Server sending rate control packet");
+						System.out.println(" Server sending rate control packet " + ratecontrol + " : " + ctx.getConnection());
 					} else {
 						System.out.println(" UNABLE TO SEND RATE CONTOL PACKET **** PANIC *****");
 					}
@@ -58,7 +58,7 @@ public class TCPServerFilter extends BaseFilter {
 					if (packet.type == packet.TYPE_RTP) {
 						RTPDatagramPacket dp = new RTPDatagramPacket();
 						dp.initWithTCPPacket((RTPTCPPacket)packet);
-						if (count % 999 == 0) System.out.println("TCP: " + "Read packet #" + count + ", lenght " + dp.getLength() + "Seq #" + dp.getSequenceNumber() + " client: " + ctx.getConnection().getPeerAddress().toString());
+						if (count % 1000 == 0) System.out.println("TCP: " + "Read packet #" + count + ", lenght " + dp.getLength() + "Seq #" + dp.getSequenceNumber() + " client: " + ctx.getConnection().getPeerAddress().toString());
 			    		rtpBuffer.insert(dp);
 			    		if (rtpBuffer.serverMissingPackets.size() >0) {
 			    			ArrayList<Integer> missing = new ArrayList<Integer>(rtpBuffer.serverMissingPackets);

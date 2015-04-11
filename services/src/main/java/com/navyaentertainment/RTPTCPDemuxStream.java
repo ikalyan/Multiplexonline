@@ -22,6 +22,7 @@ public class RTPTCPDemuxStream {
 		RTPDatagramPacket packet  = null;
     	while(true) {
     		try {
+    			manager.sortReadyClientsByRateControl();
     			for (int i=0; i < manager.getInstance().readyClients.size(); i++) {
     				if (TCPClientManager.getInstance().getMissingPackets() != null && TCPClientManager.getInstance().getMissingPackets().size() > 0) {
     					buffer.setClientMissingPackets(TCPClientManager.getInstance().getMissingPackets());
@@ -59,9 +60,9 @@ public class RTPTCPDemuxStream {
 	    					packet = null;
     					} else {
     						if (client == null) {
-    							System.out.println("cleint is null");
+    							System.out.println("client is null");
     						} else {
-    							System.out.println("Client is not ready for write " + client.isBlocking());
+    							//System.out.println("Client is not ready for write " + client.isBlocking());
     						}
     					}
     					//success = true;

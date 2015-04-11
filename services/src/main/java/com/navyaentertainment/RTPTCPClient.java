@@ -62,14 +62,14 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
 	
 	private int timeDiff = -65000;
 	
-	static final public int maxPings = 	10;
+	static final public int maxPings = 	1000;
 	
 	private ArrayList<TCPPingRequest> pingRequests = new ArrayList<TCPPingRequest>();
 	private int pendingRequests = 0;
 	private int pingRequestCount = 0;
 	
-	private short rateControlInKbps = 100;
-	
+	private short rateControlInKbps = 2000;
+
 	private void clearStatistics() {
 		averageRoundTrip = 0;
 		averageTBPCleint = 0;
@@ -460,6 +460,10 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
 		// Let the manager know about the update.
 		
 		System.out.print("Connection Updated");
+	}
+	
+	public Short getRateControlInKbps() {
+		return rateControlInKbps;
 	}
 
 }
