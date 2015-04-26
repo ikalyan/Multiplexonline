@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Interfaces {
 	
@@ -14,6 +15,7 @@ public class Interfaces {
 	private HashMap<String, InetAddress> addressMap = new HashMap<String, InetAddress>();
 	private ArrayList<NetworkInterface> interfaces = new ArrayList<NetworkInterface>();
 	private InetAddress loopback = null;
+	private static Map<String,Boolean> connectionStatus = new HashMap<String, Boolean>();
 
 	public Interfaces() {
 		super();
@@ -73,10 +75,27 @@ public class Interfaces {
 				if ( address != null) {
 					addresses.add(address);
 					interfaces.add(netint);
+					if(connectionStatus.get(netint.getName()) == null){
+						connectionStatus.put(netint.getName(),true);
+					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @return the connectionStatus
+	 */
+	public static Map<String, Boolean> getConnectionStatus() {
+		return connectionStatus;
+	}
+
+	/**
+	 * @param connectionStatus the connectionStatus to set
+	 */
+	public static void setConnectionStatus(Map<String, Boolean> connectionStatus) {
+		Interfaces.connectionStatus = connectionStatus;
 	}
 }

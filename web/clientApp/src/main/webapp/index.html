@@ -105,17 +105,28 @@
 			}).success(function(response) {
 				$scope.interfaces=[];
 				angular.forEach(response, function(network){
-					interface = {'displayName':network.displayName,'name':network.name};
+					interface = {'displayName':network.displayName,'name':network.name,'status':network.status};
 					angular.forEach(network.addrs, function(addr){
 						if(addr.broadcast != null){
 							interface.address = addr.address;
 						}
 					});
 					$scope.interfaces.push(interface);
-				});
+				});	
 			});
 		   $scope.interfaceApply = function(){
-			   alert("Not yet implimented");
+			   var data = [];
+			   angular.forEach($scope.interfaces, function(network){
+				   var req = {'name':network.name,'status':network.status+""};
+				   data.push(req);
+			   });
+			   apiService.request({
+					 apiMethod: "services/deMuxClient/updateChannels",
+					 httpMethod:"POST",
+					 params:data
+				}).success(function(response) {
+						alert("successfully updated...")
+				});
 		   }
 		   
 	   });

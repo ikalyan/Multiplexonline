@@ -11,7 +11,13 @@
 				</thead>
 				<tbody>
     				<tr ng-repeat="interface in interfaces">
-    					<td><input type="button" ng-model="interface.name" value="ON"></td>
+    					<td>
+    						<label class="switch">
+    						<input type="checkbox" class="switch-input" ng-model="interface.status"/>
+      						<span class="switch-label" data-on="On" data-off="Off"></span>
+      						<span class="switch-handle"></span>
+    						</label>
+    					<label></label></td>
     					<td>{{interface.displayName}}</td>
     					<td>{{interface.address}}</td>
     				</tr>
