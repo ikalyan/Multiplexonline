@@ -4,9 +4,15 @@ public class RTPTCPServerConnectionInfo {
 	
 	public String clientInterface;
 	public String clientAddress;
-	public long packetCount;
+	public long receievedInKbps;
 	public long totalBytesRecieved;
-	public long byesPerSecond;
+	
+	public long recentRateControl;
+	public long sendTimeWindow;
+	public long receiveTimeWindow;
+	
+	public long packetCount;
+	public long bytesPerSecond;
 	public short averageRecieveTimeBetweenPackets;
 	public short avarageSendTimeBetweenPackets;
 	

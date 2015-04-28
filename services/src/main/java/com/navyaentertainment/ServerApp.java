@@ -42,7 +42,7 @@ public class ServerApp {
 				// Pass a lambda to a thread
 				new Thread(() -> {
 					logger.info("TCP Reading thread for muxing");
-					int port = 6000;
+					int port = 7777;
 					InetAddress address = null;
 					try {
 						address = InetAddress.getByName("0.0.0.0");

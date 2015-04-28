@@ -1,20 +1,26 @@
 <div class="panel-body" id="serverInfo">
 	<div class="row">
-		<div class="col-sm-12 ">Server Connections Info</div>
+		<div class="col-sm-12 "><b><i>Connection Information:</i></b></div>
 		<div class="col-sm-12 ">
-		<div class="col-lg-6" style="border:2px solid #ccc;margin:5px" ng-repeat="serverInfo in serverConnectionInfo"> 
-			<div class="col-sm-5 " style="width:47.666667%">avarageSendTimeBetweenPackets</div><div class="col-sm-1 ">{{serverInfo.avarageSendTimeBetweenPackets}}</div>
+		<div class="col-lg-6" style="border:2px solid #ccc;margin:5px" ng-repeat="serverInfo in serverConnectionInfo">
+		 	<div class="col-sm-5 " style="width:47.666667%"><b>CONNECTION: </b></div><div class="col-sm-1 "> {{serverInfo.clientInterface}}/{{serverInfo.clientAddress}}</div>
+			<div class="col-sm-5 " style="width:47.666667%"><b>AVERAGE (Kbps): </b></div><div class="col-sm-1 ">{{serverInfo.receievedInKbps}}</div>
+			<div class="col-sm-5 " style="width:47.666667%"><b>TOTAL BYTES</b></div><div class="col-sm-1 ">{{serverInfo.totalBytesRecieved}}</div>
+			
+			<div class="col-sm-5 " style="width:47.666667%"><b>RATE CONTROL (KBps): </b></div><div class="col-sm-1 "> {{serverInfo.recentRateControl}}</div>
+			<div class="col-sm-5 " style="width:47.666667%"><b>SEND TIME WINDOW </b></div><div class="col-sm-1 ">{{serverInfo.sendTimeWindow}}</div>
+			<div class="col-sm-5 " style="width:47.666667%"><b>REC TIME WINDOW</b></div><div class="col-sm-1 ">{{serverInfo.receiveTimeWindow}}</div>
+			
+			
+			<!-- <div class="col-sm-5 " style="width:47.666667%">avarageSendTimeBetweenPackets</div><div class="col-sm-1 ">{{serverInfo.avarageSendTimeBetweenPackets}}</div>
 			<div class="col-sm-5 " style="width:47.666667%">averageReceieveTimeBetweenPings</div><div class="col-sm-1 ">{{serverInfo.averageReceieveTimeBetweenPings}}</div>
 			<div class="col-sm-5 " style="width:47.666667%">averageRecieveTimeBetweenPackets</div><div class="col-sm-1 ">{{serverInfo.averageRecieveTimeBetweenPackets}}</div>
 			<div class="col-sm-5 " style="width:47.666667%">averageSendTimeBetweenPings</div><div class="col-sm-1 ">{{serverInfo.averageSendTimeBetweenPings}}</div>
-			<div class="col-sm-5 " style="width:47.666667%">byesPerSecond</div><div class="col-sm-1 ">{{serverInfo.byesPerSecond}}</div>
-			<div class="col-sm-5 " style="width:47.666667%">clientAddress</div><div class="col-sm-1 " ng-if="serverInfo.clientAddress == null"> &nbsp;</div><div class="col-sm-1 " ng-if="serverInfo.clientAddress != null"> {{serverInfo.clientAddress}}</div>
-			<div class="col-sm-5 " style="width:47.666667%">clientInterface</div><div class="col-sm-1 " ng-if="serverInfo.clientInterface == null"> &nbsp;</div><div class="col-sm-1 " ng-if="serverInfo.clientInterface != null">{{serverInfo.clientInterface}}</div>
+			<div class="col-sm-5 " style="width:47.666667%">bytesPerSecond</div><div class="col-sm-1 ">{{serverInfo.bytesPerSecond}}</div>
 			<div class="col-sm-5 " style="width:47.666667%">packetCount</div><div class="col-sm-1 ">{{serverInfo.packetCount}}</div>
 			<div class="col-sm-5 " style="width:47.666667%">pingPacketsPerSecond</div><div class="col-sm-1 ">{{serverInfo.pingPacketsPerSecond}}</div>
 			<div class="col-sm-5 " style="width:47.666667%">pingRequestCount</div><div class="col-sm-1 ">{{serverInfo.pingRequestCount}}</div>
-			<div class="col-sm-5 " style="width:47.666667%">totalBytesRecieved</div><div class="col-sm-1 ">{{serverInfo.totalBytesRecieved}}</div>
-		</div>
+		 --></div>
 		<div class="col-lg-6">
 			<div id="drawGraph"></div>
 		</div>

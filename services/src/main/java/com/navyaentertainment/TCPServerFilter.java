@@ -60,7 +60,7 @@ public class TCPServerFilter extends BaseFilter {
 						dp.initWithTCPPacket((RTPTCPPacket)packet);
 						if (count % 1000 == 0) System.out.println("TCP: " + "Read packet #" + count + ", lenght " + dp.getLength() + "Seq #" + dp.getSequenceNumber() + " client: " + ctx.getConnection().getPeerAddress().toString());
 			    		rtpBuffer.insert(dp);
-			    		if (rtpBuffer.serverMissingPackets.size() >0) {
+			    		if (rtpBuffer.serverMissingPackets.size() > 0) {
 			    			ArrayList<Integer> missing = new ArrayList<Integer>(rtpBuffer.serverMissingPackets);
 			    			RTPTCPMissingPackets mpacket = new RTPTCPMissingPackets();
 			    			mpacket.setMissingPackets(missing);

@@ -15,11 +15,12 @@ import com.navyaentertainment.services.ClientConfigSettings;
 public class ClientApp {
 
 	protected static Logger logger = Logger.getLogger(ClientApp.class);
-	private static RTPBuffer buffer = new RTPBuffer(ClientConfigSettings.bufferTime, ClientConfigSettings.gracePeriod, false);
-	private Thread[] clientThread;
+	private static RTPBuffer buffer;
+	private Thread[] clientThreads;
 	RTPInputStream stream = null;
+	RTPTCPDemuxStream demuxStream = null;
 	public void run() {
-		
+		buffer =  new RTPBuffer(ClientConfigSettings.bufferTime, ClientConfigSettings.gracePeriod, false);
 		Thread[] threads = {
 
 				// Pass a lambda 
@@ -30,7 +31,7 @@ public class ClientApp {
 						InetAddress address = null;
 						try {
 							address = InetAddress.getByName("0.0.0.0");
-							stream = new RTPInputStream(address, port);
+							if (stream == null) stream = new RTPInputStream(address, port);
 							stream.recieve(buffer);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -44,66 +45,27 @@ public class ClientApp {
 					// readRTPStreamToBuffer();
 
 						try {
-							RTPTCPDemuxStream stream = new RTPTCPDemuxStream();
-							stream.send(buffer);
+							demuxStream = new RTPTCPDemuxStream();
+							demuxStream.send(buffer);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 
 					}) };
-		clientThread = threads;
+		clientThreads = threads;
 		// Start all threads
-		Arrays.stream(clientThread).forEach(Thread::start);
-
-		// Join all threads
-//		Arrays.stream(clientThread).forEach(t -> {
-//
-//			try {
-//				logger.info("Wating for thread to Join " + t.getName());
-//				t.join();
-//			} catch (InterruptedException ignore) {
-//			}
-//		});
-
-	}
-
-	public static void readRTPStreamToBuffer() {
-		try {
-			int port = 9000;
-			InetAddress address = InetAddress.getByName("127.0.0.1");
-			UDPServer server = new UDPServer(address, port, true);
-			server.bind();
-			long count = 0;
-			RTPDatagramPacket rtppacket = new RTPDatagramPacket();
-			Date start = new Date();
-			while (count < 5000) {
-				try {
-					server.readPacket(rtppacket);
-					rtppacket = buffer.insert(rtppacket);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				count++;
-				// logger.info("Read packet #" + count + ", lenght " +
-				// rtppacket.getLength() + "Seq #" +
-				// rtppacket.getSequenceNumber() );
-			}
-			Date end = new Date();
-			logger.info("Total no of packets read: " + count + "time :" + (count / ((end.getTime() - start.getTime()) / 1000)) + "packes/ms.");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void sendRTPStream() {
-
+		Arrays.stream(clientThreads).forEach(Thread::start);
 	}
 	
 	public void stop(){
-		stream.unbound();
-		Arrays.stream(clientThread).forEach(Thread::stop);
+		buffer = null;
+//		if (stream != null) stream.unbound();
+//		stream = null;
+		if (demuxStream != null) demuxStream.reset();
+		demuxStream = null;
+		if (clientThreads != null) Arrays.stream(clientThreads).forEach(Thread::stop);
+		clientThreads = null;
 	}
 	
 }

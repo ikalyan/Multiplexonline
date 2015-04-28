@@ -48,6 +48,14 @@ public class RTPBuffer {
 	}
 	
 	synchronized public RTPDatagramPacket insert(RTPDatagramPacket packet) {
+		
+		/* Check for duplicate packet, could occur due to retransmission of Broadcast mode */
+		RTPDatagramPacket returnPacket = packets[packet.getSequenceNumber()];
+		if (returnPacket.getMissingSequence() != -1 && returnPacket.getMissingSequence() == packet.getMissingSequence())  {
+			System.out.println("******** Missing Sequence is : *********" + returnPacket.getMissingSequence());
+			return null;
+		}
+		
 		long recieveTime = packet.getRecieveTime(); //new Date().getTime();
 		if (insertSequence == -1) {
 			insertSequence = packet.getSequenceNumber();
@@ -60,11 +68,9 @@ public class RTPBuffer {
 			resetBuffer();
 		}
 		insertTime = recieveTime;
-		RTPDatagramPacket returnPacket = packets[packet.getSequenceNumber()];
 		packets[packet.getSequenceNumber()] = packet;
 		updateInsertSequence(packet.getSequenceNumber());
-		
-		
+			
 		long currSequence = packet.getMissingSequence();//(recieveTime / missingWindowStart);
 		//packet.setMissingSequence(currSequence);
 		
@@ -204,6 +210,9 @@ public class RTPBuffer {
 		serverMissingPackets.clear();
 		clientMissingPackets.clear();
 		resetCount++;
+		for (int i=0; i<packets.length; i++) {
+			packets[i].setMissingSequence(-1);
+		}
 	}
 	
 	synchronized void setClientMissingPackets(ArrayList<Integer> missingPackets) {

@@ -98,6 +98,6 @@ public class UDPServer {
 	}
 	
 	public void unbound(){
-		socket.disconnect();
+		if (socket != null) socket.disconnect();
 	}
 }

@@ -35,7 +35,7 @@ public class DemuxClientController {
 	protected static Logger logger = Logger.getLogger(DemuxClientController.class);
 	 
 	private List<NetworkInterface> availableNetworkInterface = new ArrayList<NetworkInterface>();
-	ClientApp app = null;
+	public static ClientApp app = null;
 	private boolean appStatus = false;
 	
 	@PostConstruct
@@ -119,7 +119,7 @@ public class DemuxClientController {
 	public boolean updateBufferSettings(@RequestBody BufferDomain bufferDomain) throws IOException {
 		demuxClientServices.updateBufferSettings(bufferDomain,ConfigConstant.CLIENT);
 		app.stop();
-		app = new ClientApp();
+//		app = new ClientApp();
 		app.run();
 		return true;
 	}

@@ -19,33 +19,23 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 	
 	public final static int CP_ROUND_ROBIN = 0;
 	public final static int CP_RATE_CONTROL = 1;
+	public final static int CP_BROADCAST = 2;
 	
 	private static TCPClientManager instance;
 	Vector<RTPTCPClient> clients = new Vector<RTPTCPClient>(); 
 	ArrayList<NetworkInterface> nets = new ArrayList<NetworkInterface>();
 	ArrayList<InetAddress> addresses = null;
 	Interfaces interfaces;
+	Vector<RTPTCPClient> allClients = new Vector<RTPTCPClient>();
 	Vector<RTPTCPClient> readyClients = new Vector<RTPTCPClient>();
 	Vector<RTPTCPClient> connectedClients = new Vector<RTPTCPClient>();
 	ConcurrentHashMap<Connection<TCPNIOConnection>, RTPTCPClient> connectionMap = new ConcurrentHashMap<Connection<TCPNIOConnection>, RTPTCPClient>();
 	private ArrayList<Integer> missingPackets = null;
-	
-	Thread connectionManager = null;
+	private int demuxAlgorithm = CP_ROUND_ROBIN;
 	
 	private TCPClientManager() {
 		interfaces = new Interfaces();
 		nets = interfaces.getNetworkInterfaces();
-		connectionManager = new Thread(() -> {
-	    	while(true) {
-	    		try {
-					Thread.sleep(5000);
-//					retryConnections();
-//					initiatePingRequests();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-	    	}
-	    });
 	}
 	
 	public void sortReadyClientsByRateControl() {
@@ -57,19 +47,20 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 		});
 	}
 	
-	
-	
-	public void manageConnections() {
-		initiateConnections();
+	public void setDemuxAlgorithm(int demuxAlorithm) {
+		this.demuxAlgorithm = demuxAlorithm;
 	}
+	
+	public int getDemuxAlgorithm() {
+		return demuxAlgorithm;
+	}
+	
 	static public TCPClientManager getInstance() {
 		if (instance == null) instance = new TCPClientManager();
 		return instance;
 	}
 	
 	public void connectionSuccess(Connection<TCPNIOConnection> connection, RTPTCPClient client) {
-		clients.remove(client);
-		clients.add(client);
 		connectionMap.put(connection, client);
 		connection.removeCloseListener(this);
 		connection.addCloseListener(this);
@@ -90,6 +81,7 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 //				client.getConnection().addCloseListener(this);
 			} catch (Exception e) {
 			}
+			allClients.add(client);
 		}
 		
 		try {
@@ -98,33 +90,15 @@ public class TCPClientManager implements CloseListener<TCPNIOConnection, ICloseT
 			// do nothing
 		}
 		System.out.println("Total connected clients are : " + connectedClients.size());
-//			// Send request to determine time difference
-//			for (RTPTCPClient client : connectedClients)  {
-//				try {
-//					if (client.getConnectionState() == RTPTCPClient.CONN_ESTABLISHED) {
-//						TCPPingRequest packet = new TCPPingRequest();
-//						client.sendPingRequest(packet);
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-			
-//			try {
-//				Thread.sleep(10000); 
-//			} catch( Exception e) {
-//				e.printStackTrace();
-//			}
-			
-//			System.out.println("ALL CONNECTIONS ESTABLISHED -- SEDING PINQ REQUESTS");
-//			int i=0;
-//			long start = new Date().getTime();
-//			while(i<10000 && (new Date().getTime() - start) < 20000 ) {
-//				//i += sendPingRequestsCheckCanWrite();
-//				i += sendPingRequestLeastPendingRequests(i);
-//				
-//			}	
-		connectionManager.start();
+	}
+	
+	public void clearAllConnections() {
+		for(RTPTCPClient client : allClients) {
+			client.disconnect();
+		}
+		connectedClients.clear();
+		connectionMap.clear();
+		readyClients.clear();
 	}
 	
 	public void registerPingResponse(Connection<TCPNIOConnection> connection, TCPPingRequest request) {

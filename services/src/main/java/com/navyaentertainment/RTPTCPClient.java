@@ -46,6 +46,7 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
 	public void markConnectionAsClosed() {
 		setConnectionState(CONN_CLOSED);
 		if (connection != null) { 
+			connection.close();
 			connection = null;
 		}
 		clearStatistics();
@@ -89,39 +90,6 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
 	private SocketAddress remote = null, local = null;
 	private NetworkInterface netint = null;
 	
-	
-	public RTPTCPClient(InetAddress localAddress) {
-		 // Create a FilterChain using FilterChainBuilder
-        FilterChainBuilder filterChainBuilder = FilterChainBuilder.stateless();
-        // for reading and writing data to the connection
-        filterChainBuilder.add(new TransportFilter());
-        filterChainBuilder.add(new TCPClientFilter());
-        transport.setProcessor(filterChainBuilder.build());
-        this.localAddress = localAddress;
-        
-        
-        //remote = new InetSocketAddress("183.83.32.18", 7777);
-        remote = new InetSocketAddress("127.0.0.1", 7777);
-        local = new InetSocketAddress(localAddress, 0);
-        
-        setConnectionState(CONN_CLOSED);
-        
-        connectionManager = new Thread(() -> {
-	    	while(true) {
-	    		try {
-					Thread.sleep(5000);
-					if (getConnectionState() == CONN_CLOSED) {
-						connect();
-					} else if (getConnectionState() == CONN_ESTABLISHED) {
-						sendPingRequests();
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-	    	}
-	    });
-        connectionManager.setName("Connection Manager - " + localAddress);
-	}
 	
 	public RTPTCPClient(NetworkInterface netint) {
 		 // Create a FilterChain using FilterChainBuilder
@@ -183,6 +151,11 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     	}
 	}
     
+    public void disconnect()  {
+    	markConnectionAsClosed();
+    	connectionManager.stop();
+	}
+    
     private void initBufferSizes() {
     	if (getConnectionState() == CONN_ESTABLISHED) {
 	    	System.out.println("Write buffer size : " + connection.getWriteBufferSize());
@@ -225,7 +198,7 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     public void sendPingRequests() throws Exception {
     	connectionState.set(CONN_PING_INITIATED);
     	for (int i=0; i< maxPings;) {
-    		TCPPingRequest packet = new TCPPingRequest();
+    		TCPPingRequest packet = new TCPPingRequest(netint.getName() + ":" + localAddress.getHostAddress());
     		
     		if (sendPingRequest(packet))  {
     			i++;

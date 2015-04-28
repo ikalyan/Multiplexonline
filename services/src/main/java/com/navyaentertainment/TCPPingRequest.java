@@ -13,12 +13,19 @@ public class TCPPingRequest extends TCPCommPacket {
 	long timeRequestTime;
 	long timeResponseTime;
 	long timeRecTime;
+	String connectionInfo = "";
 	
 	long time;
 	
 	public TCPPingRequest() {
 		super();
 		this.type = TYPE_PING;
+	}
+	
+	public TCPPingRequest(String connectionInfo) {
+		super();
+		this.type = TYPE_PING;
+		this.connectionInfo = connectionInfo;
 	}
 	
 	/*
@@ -47,6 +54,7 @@ public class TCPPingRequest extends TCPCommPacket {
 		timeResponseTime = sourceBuffer.getLong();
 		message = new byte[messageSize-40];
 	    sourceBuffer.get(message);
+	    connectionInfo = new String(message).replace(',', ' ').trim();
 	}
 	
 	
@@ -72,7 +80,14 @@ public class TCPPingRequest extends TCPCommPacket {
 		bb.putLong(respRecTime);
 		bb.putLong(timeRequestTime);
 		bb.putLong(timeResponseTime);
-		if (responseTime == 0 || (respRecTime != 0 && timeRequestTime == 0)) bb.put(this.message, 0, 1300);
+		if (responseTime == 0 || (respRecTime != 0 && timeRequestTime == 0)) {
+			byte[] connInfo = new byte[0];
+			if (!"".equals(connectionInfo)) {
+				 connInfo = connectionInfo.getBytes();
+				bb.put(connInfo, 0, connInfo.length);
+			}
+			bb.put(this.message, connInfo.length, 1300 - connInfo.length);
+		}
 		//System.out.printf("%d-%d-%d-%d-%d-%d\n", requestTime, responseTime, respRecTime, timeRequestTime, timeResponseTime, timeRecTime);
 	}
 	
