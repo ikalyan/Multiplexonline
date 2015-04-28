@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -70,11 +72,19 @@ public class DemuxClientController {
 			channel.setDisplayName(networkInterface.getDisplayName());
 			channel.setName(networkInterface.getName());
 			channel.setAddrs(networkInterface.getInterfaceAddresses());
+			channel.setStatus(interfaces.getConnectionStatus().get(channel.getName()));
 			availableChannels.add(channel);
 		}
 		return availableChannels;
 	}
-	
+	@RequestMapping(value = "/updateChannels", method = RequestMethod.POST)
+	@ResponseBody
+	public boolean updateChannels(@RequestBody List<Map<String,String>> network) throws IOException {
+		for (Map<String, String> channel : network) {
+			Interfaces.getConnectionStatus().put(channel.get("name"),Boolean.parseBoolean(channel.get("status")));
+		}
+		return true;
+	}
 	@RequestMapping(value = "/pingStatus", method = RequestMethod.GET)
 	@ResponseBody
 	public boolean getPingStatus(@RequestParam("network_name") String name) throws Exception {
@@ -90,7 +100,6 @@ public class DemuxClientController {
 				System.out.println(rtptcpClient.getPingRequestSize());
 			}
 		}
-		
 		return true;
 	}
 	

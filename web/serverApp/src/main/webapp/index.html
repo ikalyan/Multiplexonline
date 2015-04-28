@@ -66,34 +66,77 @@
 				});
 		   }
 	   });
-	   deviceApp.controller('serverConnectionsInfoController',function($scope, $interval, apiService){
-		   $scope.channels = {};
+	   deviceApp.controller('serverConnectionsInfoController',function($scope, $filter, $interval, apiService){
+		   $scope.packetCount = {};
+		   $scope.missingPackets = {};
+		   $scope.buffer = {};
+		   $scope.tableData = [];
 		   $scope.x = ['x'];
 		   $scope.data = ['data1'];
-		   $scope.channels['data1']=$scope.data;
+		   $scope.packetCount['data1']=$scope.data;
+		   $scope.missingPackets['data1']=$scope.data;
+		   $scope.buffer['data1']=$scope.data;
+		   $scope.graph_type = "packets";
 		   $interval(function(){
 			apiService.request({
 				 apiMethod: "services/muxServer/getServerInfo",
 				 httpMethod:"GET"
 			}).success(function(response) {
 					$scope.serverConnectionInfo = response;
-					$scope.x.push(new Date());
+					$scope.tableData = [];
 					for(i=0;i<$scope.serverConnectionInfo.length;i++){
-						if($scope.channels['data'+i] != undefined){
-							$scope.channels['data'+i].push($scope.serverConnectionInfo[i].packetCount)
-						}else{
-							$scope.channels['data'+i] = [$scope.serverConnectionInfo[i].packetCount];
-						}
+						var label = $scope.serverConnectionInfo[i].clientInterface == null ? "data"+i : $scope.serverConnectionInfo[i].clientInterface 
+						if($scope.packetCount[label] == undefined)
+							$scope.packetCount[label] = [label]
+						$scope.packetCount[label].push($scope.serverConnectionInfo[i].packetCount); 	
+						if($scope.missingPackets[label] == undefined)
+							$scope.missingPackets[label] = [label]
+						$scope.missingPackets[label].push($scope.serverConnectionInfo[i].pingRequestCount);
+						
+						if($scope.buffer[label] == undefined)
+							$scope.buffer[label] = [label]
+						$scope.buffer[label].push($scope.serverConnectionInfo[i].byesPerSecond);
+						
+						var rowData = [label];
+						rowData.push($scope.serverConnectionInfo[i].packetCount);
+						rowData.push($scope.serverConnectionInfo[i].pingRequestCount);
+						rowData.push($scope.serverConnectionInfo[i].byesPerSecond);
+						$scope.tableData.push(rowData)
 					}
-					$scope.channels['x']=$scope.x;
+					$scope.x.push(new Date().getTime());
 					$scope.reDrawChart();
 			});
 		  },1000);
 		  $scope.reDrawChart = function(){
 			  var data = [];
-			  angular.forEach($scope.channels, function(channel){
-				  data.push(channel);
-			  });
+			  var start = 0 ;
+			  var end =  0;
+			  var updateX = false;
+			  var selectedData ={};
+			  if($scope.graph_type == "packets"){
+				  selectedData = $scope.packetCount;
+			  }else if($scope.graph_type == "missing_packets"){
+				  selectedData = $scope.missingPackets;
+			  }else if($scope.graph_type == "buffer"){
+				  selectedData = $scope.buffer;
+			  }
+			  angular.forEach(selectedData, function(packetCount){
+				  if(packetCount.length>10){
+					  start = packetCount.length - 10;
+					  end = packetCount.length;
+					  var channelData = [packetCount[0]];
+					  channelData = channelData.concat(packetCount.slice(start,end));
+					  data.push(channelData);
+					  updateX = true;
+				  }else{
+					  data.push(packetCount)
+				  }
+			  }); 
+			  if($scope.x.length>10){
+				  var xScale = ['x']
+				  $scope.x = xScale.concat($scope.x.slice($scope.x.length-10,$scope.x.length));
+			  }
+			  data.push($scope.x);
 			  chart.load({
 			        columns: data
 			    });
@@ -107,11 +150,15 @@
 			            $scope.data,
 			        ]
 			    },
+			    legend: {
+			        position: 'right'
+			    },
 			    axis: {
 			        x: {
-			            type: 'timeseries',
 			            tick: {
-			                format: '%Y-%m-%d'
+			            	format: function (x) { 
+                                return $filter('date')(x, "HH:mm:ss                MMM dd/yy");
+                            }
 			            }
 			        }
 			    }

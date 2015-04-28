@@ -22,8 +22,30 @@
 			<div class="col-sm-5 " style="width:47.666667%">pingRequestCount</div><div class="col-sm-1 ">{{serverInfo.pingRequestCount}}</div>
 		 --></div>
 		<div class="col-lg-6">
+			<div class="col-sm-5 " style="width:47.666667%">totalBytesRecieved</div><div class="col-sm-1 ">{{serverInfo.totalBytesRecieved}}</div>
+		</div>
+		</div>
+		<div class="col-sm-12 pull-right" >
+			<select ng-model="graph_type">
+				<option value="packets">Packets</option>
+				<option value="missing_packets">Missing packets</option>
+				<option value="buffer">Buffer</option>
+			</select>
+		</div>
+		<div class="col-sm-12">
 			<div id="drawGraph"></div>
 		</div>
+		<div class="col-sm-12">
+			<table style="width:100%" class="table table-striped"><thead><tr><th>Interface</th><th>Packets</th><th>Missing Packets</th><th>Buffer</th></tr>
+			<tbody>
+				<tr ng-repeat="data in tableData">
+					<td>{{data[0]}}</td>
+					<td>{{data[1]}}</td>
+					<td>{{data[2]}}</td>
+					<td>{{data[3]}}</td>
+				</tr>
+			</tbody>
+			</table>
 		</div>
 	</div>
 </div>

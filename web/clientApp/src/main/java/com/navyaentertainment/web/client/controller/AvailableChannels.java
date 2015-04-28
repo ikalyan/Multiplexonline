@@ -1,12 +1,14 @@
 package com.navyaentertainment.web.client.controller;
 
+import java.io.Serializable;
 import java.net.InterfaceAddress;
 import java.util.List;
 
-public class AvailableChannels {
+public class AvailableChannels implements Serializable {
 	private String name;
     private String displayName;
     private List<InterfaceAddress> addrs;
+    private Boolean status;
 	/**
 	 * @return the name
 	 */
@@ -42,5 +44,17 @@ public class AvailableChannels {
 	 */
 	public void setAddrs(List<InterfaceAddress> addrs) {
 		this.addrs = addrs;
+	}
+	/**
+	 * @return the status
+	 */
+	public Boolean getStatus() {
+		return status;
+	}
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(Boolean status) {
+		this.status = status;
 	}
 }
