@@ -4,7 +4,7 @@ public class ClientSettings {
 	private String udpPort;
 	private String serverIP;
 	private String serverPort;
-	
+
 	private String bufferTime;
 	private String gracePeriod;
 	
@@ -20,6 +20,8 @@ public class ClientSettings {
 	public void setGracePeriod(String gracePeriod) {
 		this.gracePeriod = gracePeriod;
 	}
+
+	private int demuxAlgorithm;
 	/**
 	 * @return the udpPort
 	 */
@@ -56,5 +58,16 @@ public class ClientSettings {
 	public void setServerPort(String serverPort) {
 		this.serverPort = serverPort;
 	}
-	
+	/**
+	 * @return the demuxAlgorithm
+	 */
+	public int getDemuxAlgorithm() {
+		return demuxAlgorithm;
+	}
+	/**
+	 * @param demuxAlgorithm the demuxAlgorithm to set
+	 */
+	public void setDemuxAlgorithm(int demuxAlgorithm) {
+		this.demuxAlgorithm = demuxAlgorithm;
+	}
 }

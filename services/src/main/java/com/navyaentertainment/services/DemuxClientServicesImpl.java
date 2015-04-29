@@ -152,6 +152,7 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			prop.setProperty(ConfigConstant.UDPPORT, clientSettings.getUdpPort());
 			prop.setProperty(ConfigConstant.SERVERIP, clientSettings.getServerIP());
 			prop.setProperty(ConfigConstant.SERVERPORT, clientSettings.getServerPort());
+			prop.setProperty(ConfigConstant.DEMUXALGORITHM, clientSettings.getDemuxAlgorithm()+"");
 			prop.store(output, null);
 			setClientSettings(clientSettings);;
 		} catch (IOException io) {
@@ -178,6 +179,8 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			clientSettings.setUdpPort(prop.getProperty(ConfigConstant.UDPPORT));
 			clientSettings.setBufferTime(prop.getProperty(ConfigConstant.CLIENT_BUFFERTIME));
 			clientSettings.setGracePeriod(prop.getProperty(ConfigConstant.CLIENT_GRACEPERIOD));
+			String demuxAlrgoritm = prop.getProperty(ConfigConstant.DEMUXALGORITHM) == null ||  prop.getProperty(ConfigConstant.DEMUXALGORITHM) == "" ? "0" : prop.getProperty(ConfigConstant.DEMUXALGORITHM);
+			clientSettings.setDemuxAlgorithm(Integer.parseInt(demuxAlrgoritm));
 		} catch (IOException io) {
 			io.printStackTrace();
 		} 
@@ -185,11 +188,13 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 	}
 	
 	public void setClientSettings(ClientSettings clientSettings){
+
 		ClientConfigSettings.getInstance().setUdpPort(clientSettings.getUdpPort());
 		ClientConfigSettings.getInstance().setServerIP(clientSettings.getServerIP());
 		ClientConfigSettings.getInstance().setServerPort(clientSettings.getServerPort() == null ? 7777 : Integer.parseInt(clientSettings.getServerPort()));
 		ClientConfigSettings.getInstance().setBufferTime(clientSettings.getBufferTime() == null ? 1000 : Integer.parseInt(clientSettings.getBufferTime()));
 		ClientConfigSettings.getInstance().setGracePeriod(clientSettings.getGracePeriod() == null ? 1000 : Integer.parseInt(clientSettings.getGracePeriod()));
 		
+		ClientConfigSettings.getInstance().setDemuxAlgorithm(clientSettings.getDemuxAlgorithm());
 	}
 }

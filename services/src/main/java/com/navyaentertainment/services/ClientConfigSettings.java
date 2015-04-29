@@ -8,7 +8,16 @@ public class ClientConfigSettings {
 	
 	private int bufferTime =5000;
 	private int gracePeriod = 250;
+	private int demuxAlgorithm = 0;
 	
+	public int getDemuxAlgorithm() {
+		return demuxAlgorithm;
+	}
+
+	public void setDemuxAlgorithm(int demuxAlgorithm) {
+		this.demuxAlgorithm = demuxAlgorithm;
+	}
+
 	public String getUdpPort() {
 		return udpPort;
 	}

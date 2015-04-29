@@ -48,6 +48,7 @@ public class ClientApp {
 
 						try {
 							demuxStream = new RTPTCPDemuxStream();
+							demuxStream.setDemuxAlgorithm(ClientConfigSettings.getInstance().getDemuxAlgorithm());
 							demuxStream.send(buffer);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
