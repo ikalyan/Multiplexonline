@@ -73,22 +73,18 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 		OutputStream output = null;
 
 		try {
-			prop = getProperties();
-			output = new FileOutputStream(propertyFile);
 			if(ConfigConstant.CLIENT.equals(type)){
+				prop = getProperties();
+				output = new FileOutputStream(propertyFile);
 				prop.setProperty(ConfigConstant.CLIENT_BUFFERTIME, bufferDomain.getBufferTime());
 				prop.setProperty(ConfigConstant.CLIENT_GRACEPERIOD, bufferDomain.getGracePeriod());
 				ClientConfigSettings.getInstance().setBufferTime(Integer.parseInt(bufferDomain.getBufferTime()));
 				ClientConfigSettings.getInstance().setGracePeriod(Integer.parseInt(bufferDomain.getGracePeriod()));
+				prop.store(output, null);
 			}else{
-				prop.setProperty(ConfigConstant.SERVER_BUFFERTIME, bufferDomain.getBufferTime());
-				prop.setProperty(ConfigConstant.SERVER_GRACEPERIOD, bufferDomain.getGracePeriod());
-				ServerConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
-				ServerConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+				ServerConfigSettings.getInstance().setBufferDomain(bufferDomain);
 			}
 			
-			prop.store(output, null);
-
 		} catch (IOException io) {
 			io.printStackTrace();
 		} finally {
@@ -119,8 +115,8 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			}else{
 				bufferDomain.setBufferTime(prop.getProperty(ConfigConstant.SERVER_BUFFERTIME,"5000"));
 				bufferDomain.setGracePeriod(prop.getProperty(ConfigConstant.SERVER_GRACEPERIOD,"250"));
-				ServerConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
-				ServerConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+				ServerConfigSettings.getInstance().setBufferTime(Integer.parseInt(bufferDomain.getBufferTime()));
+				ServerConfigSettings.getInstance().setGracePeriod(Integer.parseInt(bufferDomain.getGracePeriod()));
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();

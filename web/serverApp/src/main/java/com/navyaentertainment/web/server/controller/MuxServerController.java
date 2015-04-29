@@ -25,6 +25,7 @@ import com.navyaentertainment.services.ClientSettings;
 import com.navyaentertainment.services.ConfigConstant;
 import com.navyaentertainment.services.DemuxClientServices;
 import com.navyaentertainment.services.MuxServerServices;
+import com.navyaentertainment.services.ServerConfigSettings;
 
 @Controller
 @RequestMapping("/muxServer")
@@ -45,8 +46,9 @@ public class MuxServerController {
 		if(!file.exists()){
 			file.createNewFile();
 		}
-		ClientSettings clientSettings = demuxClientServices.getClientSettings(file);
-		demuxClientServices.setClientSettings(clientSettings);
+		ServerConfigSettings.getInstance(servletContext.getContextPath());
+//		ClientSettings clientSettings = demuxClientServices.getClientSettings(file);
+//		demuxClientServices.setClientSettings(clientSettings);
 		app = new ServerApp();
 		app.start();
 		appStatus = true;
@@ -87,7 +89,9 @@ public class MuxServerController {
 	@RequestMapping(value = "/bufferSettings", method = RequestMethod.GET)
 	@ResponseBody
 	public BufferDomain getBufferSettings() throws IOException {
-		BufferDomain bufferDomain = demuxClientServices.getBufferSettings(ConfigConstant.SERVER);
+		BufferDomain bufferDomain = ServerConfigSettings.getInstance().getBufferDomain();//demuxClientServices.getBufferSettings(ConfigConstant.SERVER);
+//		ServerConfigSettings.getInstance().setBufferTime(Integer.parseInt(bufferDomain.getBufferTime()));
+//		ServerConfigSettings.getInstance().setGracePeriod(Integer.parseInt(bufferDomain.getGracePeriod()));
 		return bufferDomain;
 	}
 	
@@ -95,6 +99,8 @@ public class MuxServerController {
 	@ResponseBody
 	public boolean updateBufferSettings(@RequestBody BufferDomain bufferDomain) throws Exception {
 		demuxClientServices.updateBufferSettings(bufferDomain,ConfigConstant.SERVER);
+		ServerConfigSettings.getInstance().setBufferTime(Integer.parseInt(bufferDomain.getBufferTime()));
+		ServerConfigSettings.getInstance().setGracePeriod(Integer.parseInt(bufferDomain.getGracePeriod()));
 		app.stop();
 		app = new ServerApp();
 		app.start();

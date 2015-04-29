@@ -20,7 +20,7 @@ public class ServerApp {
 	RTPOutputStream outputStream = null;
 	RTPTCPInputStream inputStream = null;
 	public void start() throws Exception {
-		ServerApp.muxBuffer = new RTPBuffer(ServerConfigSettings.bufferTime, ServerConfigSettings.gracePeriod, true);
+		ServerApp.muxBuffer = new RTPBuffer(ServerConfigSettings.getInstance().getBufferTime(), ServerConfigSettings.getInstance().getGracePeriod(), true);
 		Thread[] threads = {
 				
 				// Pass a lambda to a thread
