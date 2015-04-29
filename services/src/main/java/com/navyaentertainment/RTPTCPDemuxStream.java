@@ -41,7 +41,7 @@ public class RTPTCPDemuxStream {
 
 		RTPDatagramPacket packet  = null;
     	while(process) {
-    		if (manager.getDemuxAlgorithm() == TCPClientManager.CP_ROUND_ROBIN) {
+    		if (getDemuxAlgorithm() == TCPClientManager.CP_ROUND_ROBIN) {
 	    		try {
 	    			manager.sortReadyClientsByRateControl();
 	    			for (int i=0; i < manager.readyClients.size(); i++) {
@@ -92,7 +92,7 @@ public class RTPTCPDemuxStream {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-    		} else if (manager.getDemuxAlgorithm() == manager.CP_RATE_CONTROL) { 
+    		} else if (getDemuxAlgorithm() == manager.CP_RATE_CONTROL) { 
     			try {
     				if (TCPClientManager.getInstance().getMissingPackets() != null && TCPClientManager.getInstance().getMissingPackets().size() > 0) {
     					buffer.setClientMissingPackets(TCPClientManager.getInstance().getMissingPackets());
@@ -103,6 +103,8 @@ public class RTPTCPDemuxStream {
 	    					Thread.sleep(100);
 	    				}
     				}
+					count++;
+					if (count %1000 == 0) System.out.println(new Date() + " TCPBC: Sending packet #" + count + ", SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
 	    			manager.sortReadyClientsByRateControl();
 	    			boolean success = false;
 	    			for (int i=0; i < manager.getInstance().readyClients.size() && !success; i++) {
@@ -144,7 +146,7 @@ public class RTPTCPDemuxStream {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-    		} else if (manager.getDemuxAlgorithm() == manager.CP_BROADCAST) { 
+    		} else if (getDemuxAlgorithm() == manager.CP_BROADCAST) { 
     			try {
     				if (TCPClientManager.getInstance().getMissingPackets() != null && TCPClientManager.getInstance().getMissingPackets().size() > 0) {
     					buffer.setClientMissingPackets(TCPClientManager.getInstance().getMissingPackets());
@@ -162,9 +164,9 @@ public class RTPTCPDemuxStream {
 							//System.out.println("Missing SEQ GREATER THAN 10 " + missingSequence + " : " + packet.getMissingSequence());
 						}
 						packet.resetSendTime();
-						count++;
-    					if (count %1000 == 0) System.out.println(new Date() + " TCPBC: Sending packet #" + count + ", SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
 					}
+					count++;
+					if (count %1000 == 0) System.out.println(new Date() + " TCPBC: Sending packet #" + count + ", SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
 	    			manager.sortReadyClientsByRateControl();
 	    			boolean packetWritten = false;
 	    			for (int i=0; i < manager.getInstance().readyClients.size(); i++) {
