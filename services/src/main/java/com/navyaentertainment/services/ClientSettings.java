@@ -4,6 +4,22 @@ public class ClientSettings {
 	private String udpPort;
 	private String serverIP;
 	private String serverPort;
+	
+	private String bufferTime;
+	private String gracePeriod;
+	
+	public String getBufferTime() {
+		return bufferTime;
+	}
+	public void setBufferTime(String bufferTime) {
+		this.bufferTime = bufferTime;
+	}
+	public String getGracePeriod() {
+		return gracePeriod;
+	}
+	public void setGracePeriod(String gracePeriod) {
+		this.gracePeriod = gracePeriod;
+	}
 	/**
 	 * @return the udpPort
 	 */

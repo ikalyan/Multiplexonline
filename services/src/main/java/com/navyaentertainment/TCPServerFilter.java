@@ -2,6 +2,7 @@ package com.navyaentertainment;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.filterchain.BaseFilter;
@@ -58,7 +59,7 @@ public class TCPServerFilter extends BaseFilter {
 					if (packet.type == packet.TYPE_RTP) {
 						RTPDatagramPacket dp = new RTPDatagramPacket();
 						dp.initWithTCPPacket((RTPTCPPacket)packet);
-						if (count % 1000 == 0) System.out.println("TCP: " + "Read packet #" + count + ", lenght " + dp.getLength() + "Seq #" + dp.getSequenceNumber() + " client: " + ctx.getConnection().getPeerAddress().toString());
+						if (count % 1000 == 0) System.out.println(new Date() + "TCP: " + "Read packet #" + count + ", lenght " + dp.getLength() + "Seq #" + dp.getSequenceNumber() + " client: " + ctx.getConnection().getPeerAddress().toString());
 			    		rtpBuffer.insert(dp);
 			    		if (rtpBuffer.serverMissingPackets.size() > 0) {
 			    			ArrayList<Integer> missing = new ArrayList<Integer>(rtpBuffer.serverMissingPackets);

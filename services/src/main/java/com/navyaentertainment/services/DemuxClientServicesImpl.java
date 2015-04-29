@@ -66,6 +66,7 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 		properties.load(input);
 		return properties;
 	}
+	
 	@Override
 	public boolean updateBufferSettings(BufferDomain bufferDomain,String type) {
 		Properties prop = new Properties();
@@ -77,8 +78,8 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			if(ConfigConstant.CLIENT.equals(type)){
 				prop.setProperty(ConfigConstant.CLIENT_BUFFERTIME, bufferDomain.getBufferTime());
 				prop.setProperty(ConfigConstant.CLIENT_GRACEPERIOD, bufferDomain.getGracePeriod());
-				ClientConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
-				ClientConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+				ClientConfigSettings.getInstance().setBufferTime(Integer.parseInt(bufferDomain.getBufferTime()));
+				ClientConfigSettings.getInstance().setGracePeriod(Integer.parseInt(bufferDomain.getGracePeriod()));
 			}else{
 				prop.setProperty(ConfigConstant.SERVER_BUFFERTIME, bufferDomain.getBufferTime());
 				prop.setProperty(ConfigConstant.SERVER_GRACEPERIOD, bufferDomain.getGracePeriod());
@@ -113,8 +114,8 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 				bufferDomain = new BufferDomain();
 				bufferDomain.setBufferTime(prop.getProperty(ConfigConstant.CLIENT_BUFFERTIME,"250"));
 				bufferDomain.setGracePeriod(prop.getProperty(ConfigConstant.CLIENT_GRACEPERIOD,"1000"));
-				ClientConfigSettings.bufferTime = Integer.parseInt(bufferDomain.getBufferTime());
-				ClientConfigSettings.gracePeriod = Integer.parseInt(bufferDomain.getGracePeriod());
+				ClientConfigSettings.getInstance().setBufferTime(Integer.parseInt(bufferDomain.getBufferTime()));
+				ClientConfigSettings.getInstance().setGracePeriod(Integer.parseInt(bufferDomain.getGracePeriod()));
 			}else{
 				bufferDomain.setBufferTime(prop.getProperty(ConfigConstant.SERVER_BUFFERTIME,"5000"));
 				bufferDomain.setGracePeriod(prop.getProperty(ConfigConstant.SERVER_GRACEPERIOD,"250"));
@@ -175,6 +176,8 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			clientSettings.setServerIP(prop.getProperty(ConfigConstant.SERVERIP));
 			clientSettings.setServerPort(prop.getProperty(ConfigConstant.SERVERPORT));
 			clientSettings.setUdpPort(prop.getProperty(ConfigConstant.UDPPORT));
+			clientSettings.setBufferTime(prop.getProperty(ConfigConstant.CLIENT_BUFFERTIME));
+			clientSettings.setGracePeriod(prop.getProperty(ConfigConstant.CLIENT_GRACEPERIOD));
 		} catch (IOException io) {
 			io.printStackTrace();
 		} 
@@ -182,8 +185,11 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 	}
 	
 	public void setClientSettings(ClientSettings clientSettings){
-		ClientConfigSettings.udpPort = clientSettings.getUdpPort();
-		ClientConfigSettings.serverIP = clientSettings.getServerIP();
-		ClientConfigSettings.serverPort = clientSettings.getServerPort() == null ? 7777 : Integer.parseInt(clientSettings.getServerPort());
+		ClientConfigSettings.getInstance().setUdpPort(clientSettings.getUdpPort());
+		ClientConfigSettings.getInstance().setServerIP(clientSettings.getServerIP());
+		ClientConfigSettings.getInstance().setServerPort(clientSettings.getServerPort() == null ? 7777 : Integer.parseInt(clientSettings.getServerPort()));
+		ClientConfigSettings.getInstance().setBufferTime(clientSettings.getBufferTime() == null ? 1000 : Integer.parseInt(clientSettings.getBufferTime()));
+		ClientConfigSettings.getInstance().setGracePeriod(clientSettings.getGracePeriod() == null ? 1000 : Integer.parseInt(clientSettings.getGracePeriod()));
+		
 	}
 }

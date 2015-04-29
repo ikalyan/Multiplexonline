@@ -3,6 +3,7 @@ package com.navyaentertainment;
 import java.net.InetAddress;
 import java.nio.channels.Selector;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class RTPOutputStream {
 
@@ -47,7 +48,7 @@ public class RTPOutputStream {
     				try {
     					server.writePacket(packet, address, port);
     					count++;
-    					if (count % 1000 == 0) System.out.println("Sending packet #" + count + ", " + ipAddress.toString() + " SEQ : " + packet.getSequenceNumber() +",port " + port);
+    					if (count % 1000 == 0) System.out.println(new Date() + " Sending packet #" + count + ", " + ipAddress.toString() + " SEQ : " + packet.getSequenceNumber() +",port " + port);
     					packet = null;
     					success = true;
     				} catch (Exception e) {

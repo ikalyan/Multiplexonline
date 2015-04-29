@@ -27,6 +27,7 @@ public class RTPBuffer {
 	public ArrayList<Integer> clientMissingPackets = new ArrayList<Integer>();
 	
 	public RTPBuffer(int bufferTime, int fetchGracePeriod, boolean processMissingPackets) {
+		System.out.println("BUFFER SETTINGS " + bufferTime + ":" + fetchGracePeriod); 
 		for (int i=0; i<65536; i++) {
 			packets[i] = new RTPDatagramPacket();
 		}
@@ -161,7 +162,7 @@ public class RTPBuffer {
 			 * First process any missing packets that can be sent.
 			 */
 			if (clientMissingPackets.size() > 0) {
-				//System.out.println("Missing packets " + missingPackets);
+				System.out.println("Missing packets " + clientMissingPackets);
 				packet = packets[clientMissingPackets.get(0)];
 				System.out.println("Missing packet send time " + packet.getSendTime() + " : " + packet.getSequenceNumber());
 				clientMissingPackets.remove(0);
@@ -172,6 +173,8 @@ public class RTPBuffer {
 			
 			packet = packets[fetchSequence];
 			long elapsedTime = fetchtime - packet.getRecieveTime();
+
+			//System.out.println("BT : FGP : ET " + bufferTime + " : " + fetchGracePeriod + " : " + elapsedTime);
 			if (packet.getSequenceNumber() != fetchSequence) {
 				fetchSequence = (fetchSequence + 1) % 65536;
 				continue;

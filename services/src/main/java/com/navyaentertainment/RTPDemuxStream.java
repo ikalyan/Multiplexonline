@@ -3,6 +3,7 @@ package com.navyaentertainment;
 import java.net.InetAddress;
 import java.nio.channels.Selector;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class RTPDemuxStream {
 
@@ -55,7 +56,7 @@ public class RTPDemuxStream {
     				try {
     					server.writePacket(packet, ipAddress, 6000);
     					count++;
-    					if (count % 1000 == 0) System.out.println("Sending packet #" + count + ", " + ipAddress.toString() + " SEQ : " + packet.getSequenceNumber());
+    					if (count % 1000 == 0) System.out.println(new Date() + "Sending packet #" + count + ", " + ipAddress.toString() + " SEQ : " + packet.getSequenceNumber());
     					packet = null;
     					success = true;
     				} catch (Exception e) {

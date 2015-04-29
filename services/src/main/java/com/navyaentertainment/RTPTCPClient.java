@@ -132,7 +132,7 @@ public class RTPTCPClient  implements CompletionHandler<Connection> {
     public void connect() throws Exception {
     	try {
 	       //remote = new InetSocketAddress("192.168.56.1", 7777);
-	       remote = new InetSocketAddress(ClientConfigSettings.serverIP, ClientConfigSettings.serverPort);
+	       remote = new InetSocketAddress(ClientConfigSettings.getInstance().getServerIP(), ClientConfigSettings.getInstance().getServerPort());
 	       local = new InetSocketAddress(Interfaces.getInetAddress(netint), 0);
 	    	if (getConnectionState() == CONN_CLOSED) {
 	    		// start the transport

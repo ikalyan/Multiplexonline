@@ -1,6 +1,7 @@
 package com.navyaentertainment;
 
 import java.net.InetAddress;
+import java.util.Date;
 import java.util.HashMap;
 
 public class RTPInputStream {
@@ -30,7 +31,7 @@ public class RTPInputStream {
     		try {
 				server.readPacket(rtppacket);
 	    		count++;
-	    		if (count % 1000 == 0 || (logEveryPacket && count % 100 == 0)) System.out.println("Port: " + port + "Read packet #" + count + ", lenght " + rtppacket.getLength() + "Seq #" + rtppacket.getSequenceNumber() );
+	    		if (count % 1000 == 0 || (logEveryPacket && count % 100 == 0)) System.out.println(new Date() + " Port: " + port + "Read packet #" + count + ", lenght " + rtppacket.getLength() + "Seq #" + rtppacket.getSequenceNumber() );
 				rtppacket = buffer.insert(rtppacket);
 				//Thread.sleep(2);
 			} catch (Exception e) {

@@ -57,7 +57,7 @@ public class RTPTCPDemuxStream {
 		    						System.out.println("Ignoring packet " + packet.getSequenceNumber() + " : " + packet.getMissingSequence());
 		    					}
 		    					count++;
-		    					if (count %1000 == 0) System.out.println("TCP: Sending packet #" + count + ", " + client.getLocalAddress() + " SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
+		    					if (count %1000 == 0) System.out.println(new Date() + " TCPRR: Sending packet #" + count + ", " + client.getLocalAddress() + " SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
 		    					packet = null;
 	    					} else {
 	    						if (client == null) {
@@ -109,7 +109,7 @@ public class RTPTCPDemuxStream {
 		    						System.out.println("Ignoring packet " + packet.getSequenceNumber() + " : " + packet.getMissingSequence());
 		    					}
 		    					count++;
-		    					if (count %1000 == 0) System.out.println("TCP: Sending packet #" + count + ", " + client.getLocalAddress() + " SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
+		    					if (count % 1000 == 0) System.out.println(new Date() + " TCPCR: Sending packet #" + count + ", " + client.getLocalAddress() + " SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
 		    					packet = null;
 	    					} else {
 	    						if (client == null) {
@@ -147,7 +147,7 @@ public class RTPTCPDemuxStream {
 						}
 						packet.resetSendTime();
 						count++;
-    					if (count %1000 == 0) System.out.println("BROADCAST: Sending packet #" + count + ", SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
+    					if (count %1000 == 0) System.out.println(new Date() + " TCPBC: Sending packet #" + count + ", SEQ : " + packet.getSequenceNumber() + "   " + packet.getLength());
 					}
 	    			manager.sortReadyClientsByRateControl();
 	    			boolean packetWritten = false;

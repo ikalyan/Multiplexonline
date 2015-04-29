@@ -7,6 +7,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import com.navyaentertainment.services.ClientConfigSettings;
+import com.navyaentertainment.services.ClientSettings;
 
 /**
  * Hello world!
@@ -19,15 +20,16 @@ public class ClientApp {
 	private Thread[] clientThreads;
 	RTPInputStream stream = null;
 	RTPTCPDemuxStream demuxStream = null;
+	
 	public void run() {
-		buffer =  new RTPBuffer(ClientConfigSettings.bufferTime, ClientConfigSettings.gracePeriod, false);
+		buffer =  new RTPBuffer(ClientConfigSettings.getInstance().getBufferTime(), ClientConfigSettings.getInstance().getGracePeriod(), false);
 		Thread[] threads = {
 
 				// Pass a lambda 
 				new Thread(() -> {
 					logger.info("Reading thread from Input");
 					// readRTPStreamToBuffer();
-						int port = ClientConfigSettings.udpPort == null ? 9000 : Integer.parseInt(ClientConfigSettings.udpPort);
+						int port = ClientConfigSettings.getInstance().getUdpPort() == null ? 9000 : Integer.parseInt(ClientConfigSettings.getInstance().getUdpPort());
 						InetAddress address = null;
 						try {
 							address = InetAddress.getByName("0.0.0.0");
