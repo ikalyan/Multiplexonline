@@ -5,6 +5,7 @@ public class ConfigConstant {
 	public static final String UDPPORT ="udpPort";
 	public static final String SERVERIP ="serverIP";
 	public static final String SERVERPORT ="serverPort";
+	public static final String DEMUXALGORITHM ="demuxAlgorithm";
 	
 	public static final String FILE_LOCATION ="/etc/replicast/";
 	

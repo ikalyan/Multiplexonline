@@ -8,5 +8,6 @@ public class ClientConfigSettings {
 	
 	public static int bufferTime =5000;
 	public static int gracePeriod = 250;
+	public static int demuxAlgorithm = 0;
 	
 }

@@ -81,12 +81,14 @@
 				$scope.serverIp = response.serverIP;
 				$scope.serverPort = response.serverPort;
 				$scope.updListenerPort = response.udpPort;
+				$scope.demuxAlgorithm = response.demuxAlgorithm;
 			});
 		   	$scope.save = function(){
 		   		var data = {
 		   				"serverIP": $scope.serverIp,
 		   				"serverPort": $scope.serverPort,
-		   				"udpPort":$scope.updListenerPort
+		   				"udpPort":$scope.updListenerPort,
+		   				"demuxAlgorithm":$scope.demuxAlgorithm
 		   		}
 		   		apiService.request({
                     httpMethod: "POST",

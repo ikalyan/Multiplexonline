@@ -151,6 +151,7 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			prop.setProperty(ConfigConstant.UDPPORT, clientSettings.getUdpPort());
 			prop.setProperty(ConfigConstant.SERVERIP, clientSettings.getServerIP());
 			prop.setProperty(ConfigConstant.SERVERPORT, clientSettings.getServerPort());
+			prop.setProperty(ConfigConstant.DEMUXALGORITHM, clientSettings.getDemuxAlgorithm()+"");
 			prop.store(output, null);
 			setClientSettings(clientSettings);;
 		} catch (IOException io) {
@@ -175,6 +176,8 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 			clientSettings.setServerIP(prop.getProperty(ConfigConstant.SERVERIP));
 			clientSettings.setServerPort(prop.getProperty(ConfigConstant.SERVERPORT));
 			clientSettings.setUdpPort(prop.getProperty(ConfigConstant.UDPPORT));
+			String demuxAlrgoritm = prop.getProperty(ConfigConstant.DEMUXALGORITHM) == null ||  prop.getProperty(ConfigConstant.DEMUXALGORITHM) == "" ? "0" : prop.getProperty(ConfigConstant.DEMUXALGORITHM);
+			clientSettings.setDemuxAlgorithm(Integer.parseInt(demuxAlrgoritm));
 		} catch (IOException io) {
 			io.printStackTrace();
 		} 
@@ -185,5 +188,6 @@ public class DemuxClientServicesImpl implements DemuxClientServices {
 		ClientConfigSettings.udpPort = clientSettings.getUdpPort();
 		ClientConfigSettings.serverIP = clientSettings.getServerIP();
 		ClientConfigSettings.serverPort = clientSettings.getServerPort() == null ? 7777 : Integer.parseInt(clientSettings.getServerPort());
+		ClientConfigSettings.demuxAlgorithm = clientSettings.getDemuxAlgorithm();
 	}
 }

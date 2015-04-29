@@ -9,8 +9,24 @@ public class RTPTCPDemuxStream {
 	private static TCPClientManager manager = TCPClientManager.getInstance();
 	
 	private boolean process = true;
+	private int demuxAlgorithm = TCPClientManager.CP_ROUND_ROBIN;
+	
+	/**
+	 * @return the demuxAlgorithm
+	 */
+	public int getDemuxAlgorithm() {
+		return demuxAlgorithm;
+	}
+
+	/**
+	 * @param demuxAlgorithm the demuxAlgorithm to set
+	 */
+	public void setDemuxAlgorithm(int demuxAlgorithm) {
+		this.demuxAlgorithm = demuxAlgorithm;
+	}
 
 	public RTPTCPDemuxStream() {
+		manager.setDemuxAlgorithm(demuxAlgorithm);
 		manager.initiateConnections();	
 	}
 	
